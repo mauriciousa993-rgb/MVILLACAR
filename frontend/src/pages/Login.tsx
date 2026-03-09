@@ -33,11 +33,11 @@ const Login: React.FC = () => {
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <div className="h-20 w-20 rounded-2xl border border-[#2f3238] bg-[#1b1d22] flex items-center justify-center shadow-[0_16px_32px_-24px_rgba(0,0,0,0.9)]">
-              <img src={autoTechLogo} alt="Villacar logo" className="h-14 w-14 object-contain" />
+              <img src={autoTechLogo} alt="MVillacar logo" className="h-14 w-14 object-contain" />
             </div>
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">
-            Villacar
+            MVillacar
           </h1>
           <p className="text-ink-200">
             Sistema de Gestion de Inventario
@@ -104,7 +104,7 @@ const Login: React.FC = () => {
         </div>
 
         <div className="mt-8 text-center text-ink-300 text-sm">
-          <p>&copy; 2026 Villacar</p>
+          <p>&copy; 2026 MVillacar</p>
           <p className="mt-1 text-xs text-ink-300/90">Desarrollado por Auto Tech</p>
         </div>
       </div>
@@ -113,4 +113,3 @@ const Login: React.FC = () => {
 };
 
 export default Login;
-

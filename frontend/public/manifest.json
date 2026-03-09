@@ -1,6 +1,6 @@
 {
   "name": "Compraventa de Vehículos - Sistema de Gestión",
-  "short_name": "Villacar",
+  "short_name": "MVillacar",
   "description": "Sistema completo de gestión de inventario y compraventa de vehículos",
   "start_url": "/",
   "display": "standalone",

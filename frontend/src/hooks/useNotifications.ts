@@ -82,7 +82,7 @@ export const useNotifications = () => {
     const defaultOptions: NotificationOptions = {
       icon: '/autotech-logo.png',
       badge: '/autotech-logo.png',
-      tag: 'villacar',
+      tag: 'mvillacar',
       requireInteraction: false,
       ...options
     };
@@ -110,7 +110,7 @@ export const useNotifications = () => {
 
     // Mostrar notificación después de 5 segundos
     setTimeout(() => {
-      showNotification('📊 Revisión de Inventario - Villacar', {
+      showNotification('📊 Revisión de Inventario - MVillacar', {
         body: 'Es lunes. Recuerda revisar el estado de tu inventario de vehículos.',
         tag: 'inventory-reminder',
         requireInteraction: true,
@@ -146,4 +146,3 @@ export const useNotifications = () => {
     installPWA
   };
 };
-

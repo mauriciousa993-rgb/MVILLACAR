@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api, { buildVehiclePhotoUrl } from '../services/api';
-import villacarLogo from '../assets/autotech-logo.png';
+import mVillacarLogo from '../assets/autotech-logo.png';
 
 interface Vehicle {
   _id: string;
@@ -106,9 +106,9 @@ const Marketplace: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 py-5">
             <div className="flex items-center gap-3">
-              <img src={villacarLogo} alt="Villacar logo" className="h-12 w-12 object-contain" />
+              <img src={mVillacarLogo} alt="MVillacar logo" className="h-12 w-12 object-contain" />
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-white">Marketplace Villacar</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold text-white">Marketplace MVillacar</h1>
                 <p className="text-ink-300">Encuentra el vehiculo ideal para ti</p>
               </div>
             </div>
@@ -187,7 +187,7 @@ const Marketplace: React.FC = () => {
       <footer className="border-t border-[#274376] mt-12 bg-[#08142c]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center text-ink-300">
-            <p>&copy; 2026 Villacar Marketplace.</p>
+            <p>&copy; 2026 MVillacar Marketplace.</p>
             <p className="mt-1 text-xs text-ink-300/90">Desarrollado por Auto Tech</p>
           </div>
         </div>
