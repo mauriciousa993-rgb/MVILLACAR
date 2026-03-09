@@ -177,6 +177,8 @@ export interface VehicleInspectionChecklist {
   vehicle: string;
   inspectorName: string;
   inspectionDate: string;
+  deliveredByName: string;
+  deliveredBySignature: string;
   items: VehicleInspectionItem[];
   damageZones: VehicleDamageZone[];
   generalObservations: string;
@@ -187,6 +189,8 @@ export interface VehicleInspectionChecklist {
 export interface VehicleInspectionChecklistPayload {
   inspectorName: string;
   inspectionDate: string;
+  deliveredByName: string;
+  deliveredBySignature: string;
   items: VehicleInspectionItem[];
   damageZones: VehicleDamageZone[];
   generalObservations: string;

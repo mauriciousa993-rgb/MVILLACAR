@@ -33,6 +33,8 @@ export interface IVehicleInspectionChecklistDocument extends Document {
   vehicle: mongoose.Types.ObjectId;
   inspectorName: string;
   inspectionDate: Date;
+  deliveredByName: string;
+  deliveredBySignature: string;
   items: IInspectionItem[];
   damageZones: IDamageZone[];
   generalObservations: string;
@@ -83,6 +85,8 @@ const vehicleInspectionChecklistSchema = new Schema<IVehicleInspectionChecklistD
     vehicle: { type: Schema.Types.ObjectId, ref: 'Vehicle', required: true, unique: true, index: true },
     inspectorName: { type: String, default: '', trim: true },
     inspectionDate: { type: Date, default: Date.now },
+    deliveredByName: { type: String, default: '', trim: true },
+    deliveredBySignature: { type: String, default: '', trim: true },
     items: { type: [inspectionItemSchema], default: [] },
     damageZones: { type: [damageZoneSchema], default: [] },
     generalObservations: { type: String, default: '', trim: true },

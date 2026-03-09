@@ -47,6 +47,16 @@ const normalizePercentage = (value: any): number | null => {
   return parsed;
 };
 
+const normalizeSignatureDataUrl = (value: any): string => {
+  if (typeof value !== 'string') return '';
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+  const isValidDataUrl = /^data:image\/(png|jpeg|jpg);base64,[A-Za-z0-9+/=]+$/.test(trimmed);
+  if (!isValidDataUrl) return '';
+  if (trimmed.length > 350000) return '';
+  return trimmed;
+};
+
 const normalizeMarkerPosition = (
   value: DamageZoneInputRow['markerPosition']
 ): { x: number; y: number; z: number } | null => {
@@ -111,6 +121,8 @@ export const getVehicleInspectionChecklist = async (req: AuthRequest, res: Respo
         vehicle: id,
         inspectorName: '',
         inspectionDate: new Date().toISOString(),
+        deliveredByName: '',
+        deliveredBySignature: '',
         items: [],
         damageZones: [],
         generalObservations: '',
@@ -158,6 +170,8 @@ export const upsertVehicleInspectionChecklist = async (req: AuthRequest, res: Re
     const payload: any = {
       inspectorName: (req.body.inspectorName || '').toString().trim(),
       inspectionDate: req.body.inspectionDate ? new Date(req.body.inspectionDate) : new Date(),
+      deliveredByName: (req.body.deliveredByName || '').toString().trim(),
+      deliveredBySignature: normalizeSignatureDataUrl(req.body.deliveredBySignature),
       items,
       damageZones,
       generalObservations: (req.body.generalObservations || '').toString().trim(),

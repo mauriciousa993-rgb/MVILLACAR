@@ -6,6 +6,7 @@ import {
   Car,
   CheckCircle2,
   ClipboardCheck,
+  Eraser,
   FileText,
   Save,
 } from 'lucide-react';
@@ -26,6 +27,7 @@ type TemplateChecklistItem = Omit<
   'status' | 'observaciones' | 'responsable' | 'porcentajeEstado' | 'tipoTransmision'
 >;
 type TemplateDamageZone = Omit<VehicleDamageZone, 'status' | 'observaciones' | 'responsable'>;
+type SignaturePoint = { x: number; y: number };
 
 const CHECKLIST_TEMPLATE: TemplateChecklistItem[] = [
   { key: 'frenos', label: 'Frenos', category: 'Mecanica' },
@@ -147,9 +149,14 @@ const VehicleInspectionChecklist: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
   const viewerRef = useRef<Vehicle3DModelViewerHandle | null>(null);
+  const signatureCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const signatureLastPointRef = useRef<SignaturePoint | null>(null);
+  const [isDrawingSignature, setIsDrawingSignature] = useState(false);
 
   const [inspectorName, setInspectorName] = useState('');
   const [inspectionDate, setInspectionDate] = useState(new Date().toISOString().split('T')[0]);
+  const [deliveredByName, setDeliveredByName] = useState('');
+  const [deliveredBySignature, setDeliveredBySignature] = useState('');
   const [generalObservations, setGeneralObservations] = useState('');
   const [items, setItems] = useState<VehicleInspectionItem[]>(createDefaultItems());
   const [damageZones, setDamageZones] = useState<VehicleDamageZone[]>(createDefaultDamageZones());
@@ -182,6 +189,8 @@ const VehicleInspectionChecklist: React.FC = () => {
   const resetChecklistForm = () => {
     setInspectorName('');
     setInspectionDate(new Date().toISOString().split('T')[0]);
+    setDeliveredByName('');
+    setDeliveredBySignature('');
     setGeneralObservations('');
     setItems(createDefaultItems());
     setDamageZones(createDefaultDamageZones());
@@ -197,6 +206,8 @@ const VehicleInspectionChecklist: React.FC = () => {
           ? new Date(checklist.inspectionDate).toISOString().split('T')[0]
           : new Date().toISOString().split('T')[0]
       );
+      setDeliveredByName(checklist.deliveredByName || '');
+      setDeliveredBySignature(checklist.deliveredBySignature || '');
       setGeneralObservations(checklist.generalObservations || '');
       setItems(mergeItems(checklist.items));
       setDamageZones(mergeDamageZones(checklist.damageZones));
@@ -263,6 +274,8 @@ const VehicleInspectionChecklist: React.FC = () => {
     const rows: string[] = [];
     rows.push(`Vehiculo: ${selectedVehicle?.marca || ''} ${selectedVehicle?.modelo || ''} (${selectedVehicle?.placa || ''})`);
     rows.push(`Inspector: ${inspectorName || 'No especificado'}`);
+    rows.push(`Entrega vehiculo: ${deliveredByName || 'No especificado'}`);
+    rows.push(`Firma entrega: ${deliveredBySignature ? 'Registrada' : 'Pendiente'}`);
     rows.push(`Fecha: ${inspectionDate}`);
     rows.push('');
     rows.push(
@@ -309,6 +322,8 @@ const VehicleInspectionChecklist: React.FC = () => {
     selectedVehicle,
     inspectorName,
     inspectionDate,
+    deliveredByName,
+    deliveredBySignature,
     items.length,
     damageZones.length,
     failingItems,
@@ -404,6 +419,116 @@ const VehicleInspectionChecklist: React.FC = () => {
     );
   };
 
+  const getCanvasPoint = (event: React.PointerEvent<HTMLCanvasElement>): SignaturePoint => {
+    const canvas = signatureCanvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    return {
+      x: (event.clientX - rect.left) * scaleX,
+      y: (event.clientY - rect.top) * scaleY,
+    };
+  };
+
+  const getSignatureContext = () => {
+    const canvas = signatureCanvasRef.current;
+    if (!canvas) return null;
+    const context = canvas.getContext('2d');
+    if (!context) return null;
+    context.lineCap = 'round';
+    context.lineJoin = 'round';
+    context.lineWidth = 3;
+    context.strokeStyle = '#021D6A';
+    return { canvas, context };
+  };
+
+  const clearSignatureCanvas = (keepSignatureState = false) => {
+    const signatureCanvas = getSignatureContext();
+    if (!signatureCanvas) return;
+    const { canvas, context } = signatureCanvas;
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = '#FFFFFF';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    signatureLastPointRef.current = null;
+    if (!keepSignatureState) {
+      setDeliveredBySignature('');
+    }
+  };
+
+  const drawSignatureFromDataUrl = (dataUrl: string) => {
+    if (!dataUrl) {
+      clearSignatureCanvas(true);
+      return;
+    }
+    const signatureCanvas = getSignatureContext();
+    if (!signatureCanvas) return;
+    const { canvas, context } = signatureCanvas;
+    const image = new Image();
+    image.onload = () => {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.fillStyle = '#FFFFFF';
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    };
+    image.src = dataUrl;
+  };
+
+  const startSignatureStroke = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    const signatureCanvas = getSignatureContext();
+    if (!signatureCanvas) return;
+    const { context } = signatureCanvas;
+    const point = getCanvasPoint(event);
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setIsDrawingSignature(true);
+    signatureLastPointRef.current = point;
+    context.beginPath();
+    context.moveTo(point.x, point.y);
+    context.lineTo(point.x + 0.1, point.y + 0.1);
+    context.stroke();
+  };
+
+  const moveSignatureStroke = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    if (!isDrawingSignature) return;
+    const signatureCanvas = getSignatureContext();
+    if (!signatureCanvas) return;
+    const { context } = signatureCanvas;
+    const point = getCanvasPoint(event);
+    const lastPoint = signatureLastPointRef.current;
+    if (!lastPoint) {
+      signatureLastPointRef.current = point;
+      return;
+    }
+    context.beginPath();
+    context.moveTo(lastPoint.x, lastPoint.y);
+    context.lineTo(point.x, point.y);
+    context.stroke();
+    signatureLastPointRef.current = point;
+  };
+
+  const endSignatureStroke = () => {
+    if (!isDrawingSignature) return;
+    setIsDrawingSignature(false);
+    signatureLastPointRef.current = null;
+    const canvas = signatureCanvasRef.current;
+    if (canvas) {
+      setDeliveredBySignature(canvas.toDataURL('image/png'));
+    }
+  };
+
+  useEffect(() => {
+    clearSignatureCanvas(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    clearSignatureCanvas(true);
+    if (deliveredBySignature) {
+      drawSignatureFromDataUrl(deliveredBySignature);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deliveredBySignature]);
+
   const handleSaveChecklist = async () => {
     if (!selectedVehicleId) {
       alert('Selecciona un vehiculo para guardar el checklist');
@@ -415,6 +540,8 @@ const VehicleInspectionChecklist: React.FC = () => {
       await vehiclesAPI.saveInspectionChecklist(selectedVehicleId, {
         inspectorName,
         inspectionDate,
+        deliveredByName,
+        deliveredBySignature,
         items,
         damageZones,
         generalObservations,
@@ -520,6 +647,45 @@ const VehicleInspectionChecklist: React.FC = () => {
         });
       });
 
+      y += 4;
+      if (y + 40 > pageHeight - bottomMargin) {
+        doc.addPage();
+        y = topMargin;
+      }
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.text('Firma de quien entrega el vehiculo', 14, y);
+      y += 6;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.text(`Nombre: ${deliveredByName || 'No especificado'}`, 14, y);
+      y += 5;
+
+      if (deliveredBySignature) {
+        const signatureBoxWidth = 90;
+        const signatureBoxHeight = 30;
+        if (y + signatureBoxHeight + 8 > pageHeight - bottomMargin) {
+          doc.addPage();
+          y = topMargin;
+        }
+        doc.rect(14, y, signatureBoxWidth, signatureBoxHeight);
+        try {
+          doc.addImage(deliveredBySignature, 'PNG', 16, y + 2, signatureBoxWidth - 4, signatureBoxHeight - 4);
+          y += signatureBoxHeight + 4;
+          doc.setFontSize(9);
+          doc.text('Firma capturada en dispositivo movil', 14, y);
+        } catch (signatureError) {
+          y += signatureBoxHeight + 2;
+          doc.setFontSize(9);
+          doc.text('Firma registrada, pero no se pudo renderizar la imagen en el PDF.', 14, y);
+        }
+      } else {
+        doc.setFontSize(9);
+        doc.text('Firma: no registrada', 14, y);
+      }
+
       doc.save(`checklist-${selectedVehicle.placa}-${Date.now()}.pdf`);
     } catch (error: any) {
       console.error('Error al exportar PDF del checklist:', error);
@@ -619,6 +785,46 @@ const VehicleInspectionChecklist: React.FC = () => {
                 className="input-field"
               />
             </div>
+          </div>
+
+          <div className="mt-4 rounded-xl border border-[#2f3238] bg-[#171a20] p-4">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+              <div className="flex-1">
+                <label className="block text-sm text-ink-200 mb-1">Quien entrega el vehiculo</label>
+                <input
+                  type="text"
+                  value={deliveredByName}
+                  onChange={(e) => setDeliveredByName(e.target.value)}
+                  placeholder="Nombre de quien entrega"
+                  className="input-field"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => clearSignatureCanvas()}
+                className="btn-secondary inline-flex items-center gap-2 self-start md:self-end"
+              >
+                <Eraser className="h-4 w-4" />
+                Limpiar firma
+              </button>
+            </div>
+
+            <div className="mt-3 rounded-lg border border-[#2f3238] bg-white p-2">
+              <canvas
+                ref={signatureCanvasRef}
+                width={800}
+                height={260}
+                className="w-full h-40 rounded-md touch-none"
+                style={{ touchAction: 'none' }}
+                onPointerDown={startSignatureStroke}
+                onPointerMove={moveSignatureStroke}
+                onPointerUp={endSignatureStroke}
+                onPointerLeave={endSignatureStroke}
+              />
+            </div>
+            <p className="text-xs text-ink-300 mt-2">
+              Firma en la pantalla del celular con el dedo o en computador con mouse/pen.
+            </p>
           </div>
         </div>
 
