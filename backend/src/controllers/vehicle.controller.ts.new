@@ -1,0 +1,545 @@
+// Generar formulario de traspaso en PDF (Formato Oficial Ministerio de Transporte - RUNT)
+export const generateTransferForm = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const vehicle = await Vehicle.findById(id);
+
+    if (!vehicle) {
+      res.status(404).json({ message: 'Vehículo no encontrado' });
+      return;
+    }
+
+    // Validar que existan datos de venta
+    if (!vehicle.datosVenta || 
+        !vehicle.datosVenta.comprador?.nombre || 
+        !vehicle.datosVenta.comprador?.identificacion ||
+        !vehicle.datosVenta.vendedor?.nombre) {
+      res.status(400).json({ 
+        message: 'El vehículo no tiene datos de venta completos. Por favor, completa los datos de venta antes de generar el formulario.' 
+      });
+      return;
+    }
+
+    const fechaCelebracion = vehicle.datosVenta.transaccion.fechaCelebracion 
+      ? new Date(vehicle.datosVenta.transaccion.fechaCelebracion)
+      : new Date();
+
+    // Crear documento PDF en tamaño oficio (legal) para más espacio
+    const doc = new PDFDocument({ 
+      size: 'LEGAL',
+      margins: { top: 30, bottom: 30, left: 40, right: 40 }
+    });
+
+    // Configurar respuesta
+    const fileName = `formulario-traspaso-${vehicle.placa}-${Date.now()}.pdf`;
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+
+    // Pipe el PDF directamente a la respuesta
+    doc.pipe(res);
+
+    // Función helper para dibujar cajas
+    const drawBox = (x: number, y: number, width: number, height: number, label?: string, value?: string) => {
+      doc.rect(x, y, width, height).stroke();
+      if (label) {
+        doc.fontSize(6).font('Helvetica');
+        doc.text(label, x + 2, y + 2, { width: width - 4 });
+      }
+      if (value) {
+        doc.fontSize(8).font('Helvetica-Bold');
+        doc.text(value, x + 2, y + (label ? 12 : 8), { width: width - 4 });
+      }
+    };
+
+    // Función helper para dibujar checkbox
+    const drawCheckbox = (x: number, y: number, checked: boolean = false) => {
+      doc.rect(x, y, 10, 10).stroke();
+      if (checked) {
+        doc.fontSize(8).font('Helvetica-Bold');
+        doc.text('X', x + 3, y + 1);
+      }
+    };
+
+    let y = 30;
+
+    // === ENCABEZADO ===
+    doc.fontSize(10).font('Helvetica-Bold');
+    doc.text('MINISTERIO DE TRANSPORTE', 40, y, { align: 'center', width: 500 });
+    y += 15;
+    doc.fontSize(12).font('Helvetica-Bold');
+    doc.text('FORMULARIO DE SOLICITUD DE TRÁMITES DEL REGISTRO NACIONAL AUTOMOTOR', 40, y, { align: 'center', width: 500 });
+    y += 15;
+    doc.fontSize(9).font('Helvetica');
+    doc.text('RUNT - Registro Único Nacional de Tránsito', 40, y, { align: 'center', width: 500 });
+    y += 25;
+
+    // === SECCIÓN 1: ORGANISMO DE TRÁNSITO ===
+    doc.fontSize(8).font('Helvetica-Bold');
+    doc.text('1. ORGANISMO DE TRÁNSITO', 40, y);
+    y += 15;
+
+    // Nombre del organismo
+    drawBox(40, y, 300, 25, 'NOMBRE', vehicle.datosVenta.vehiculoAdicional.sitioMatricula || '');
+    // Ciudad
+    drawBox(345, y, 100, 25, 'CIUDAD', vehicle.datosVenta.transaccion.lugarCelebracion || '');
+    // Código
+    drawBox(450, y, 90, 25, 'CÓDIGO', '');
+    y += 30;
+
+    // Fecha de trámite
+    drawBox(40, y, 80, 20, 'DÍA', fechaCelebracion.getDate().toString());
+    drawBox(125, y, 80, 20, 'MES', (fechaCelebracion.getMonth() + 1).toString());
+    drawBox(210, y, 80, 20, 'AÑO', fechaCelebracion.getFullYear().toString());
+    y += 30;
+
+    // === SECCIÓN 2: PLACA ===
+    doc.fontSize(8).font('Helvetica-Bold');
+    doc.text('2. PLACA', 40, y);
+    y += 15;
+
+    const placa = vehicle.placa || '';
+    const letrasPlaca = placa.replace(/[0-9]/g, '');
+    const numerosPlaca = placa.replace(/[^0-9]/g, '');
+
+    drawBox(40, y, 100, 25, 'LETRAS', letrasPlaca);
+    drawBox(145, y, 100, 25, 'NÚMEROS', numerosPlaca);
+    y += 35;
+
+    // === SECCIÓN 3: TRÁMITE SOLICITADO ===
+    doc.fontSize(8).font('Helvetica-Bold');
+    doc.text('3. TRÁMITE SOLICITADO (Marque con X)', 40, y);
+    y += 15;
+
+    // Primera fila de trámites
+    drawCheckbox(40, y);
+    doc.fontSize(7).font('Helvetica').text('1. MATRÍCULA/REGISTRO', 55, y + 2);
+    
+    drawCheckbox(180, y);
+    doc.fontSize(7).font('Helvetica').text('2. TRASPASO', 195, y + 2);
+    doc.fontSize(8).font('Helvetica-Bold').text('X', 183, y + 1); // Marcado por defecto
+    
+    drawCheckbox(280, y);
+    doc.fontSize(7).font('Helvetica').text('3. TRASLADO MATRÍCULA', 295, y + 2);
+    
+    drawCheckbox(420, y);
+    doc.fontSize(7).font('Helvetica').text('4. RADICADO MATRÍCULA', 435, y + 2);
+    y += 20;
+
+    // Segunda fila de trámites
+    drawCheckbox(40, y);
+    doc.fontSize(7).font('Helvetica').text('5. CAMBIO DE COLOR', 55, y + 2);
+    
+    drawCheckbox(180, y);
+    doc.fontSize(7).font('Helvetica').text('6. CAMBIO DE SERVICIO', 195, y + 2);
+    
+    drawCheckbox(280, y);
+    doc.fontSize(7).font('Helvetica').text('7. REGRABAR MOTOR', 295, y + 2);
+    
+    drawCheckbox(420, y);
+    doc.fontSize(7).font('Helvetica').text('8. REGRABAR CHASIS', 435, y + 2);
+    y += 20;
+
+    // Tercera fila de trámites
+    drawCheckbox(40, y);
+    doc.fontSize(7).font('Helvetica').text('9. TRANSFORMACIÓN', 55, y + 2);
+    
+    drawCheckbox(180, y);
+    doc.fontSize(7).font('Helvetica').text('10. DUPLICADO LICENCIA', 195, y + 2);
+    
+    drawCheckbox(280, y);
+    doc.fontSize(7).font('Helvetica').text('11. INSCRIPCIÓN PRENDA', 295, y + 2);
+    
+    drawCheckbox(420, y);
+    doc.fontSize(7).font('Helvetica').text('12. LEVANTAMIENTO PRENDA', 435, y + 2);
+    y += 25;
+
+    // === SECCIÓN 4: CLASE DE VEHÍCULO ===
+    doc.fontSize(8).font('Helvetica-Bold');
+    doc.text('4. CLASE DE VEHÍCULO (Marque con X)', 40, y);
+    y += 15;
+
+    // Primera fila de clases
+    drawCheckbox(40, y);
+    doc.fontSize(7).font('Helvetica').text('AUTOMÓVIL', 55, y + 2);
+    doc.fontSize(8).font('Helvetica-Bold').text('X', 43, y + 1); // Marcado por defecto
+    
+    drawCheckbox(140, y);
+    doc.fontSize(7).font('Helvetica').text('BUS', 155, y + 2);
+    
+    drawCheckbox(200, y);
+    doc.fontSize(7).font('Helvetica').text('BUSETA', 215, y + 2);
+    
+    drawCheckbox(280, y);
+    doc.fontSize(7).font('Helvetica').text('CAMIÓN', 295, y + 2);
+    
+    drawCheckbox(360, y);
+    doc.fontSize(7).font('Helvetica').text('CAMIONETA', 375, y + 2);
+    
+    drawCheckbox(450, y);
+    doc.fontSize(7).font('Helvetica').text('CAMPERO', 465, y + 2);
+    y += 18;
+
+    // Segunda fila de clases
+    drawCheckbox(40, y);
+    doc.fontSize(7).font('Helvetica').text('MICROBUS', 55, y + 2);
+    
+    drawCheckbox(140, y);
+    doc.fontSize(7).font('Helvetica').text('TRACTOCAMIÓN', 155, y + 2);
+    
+    drawCheckbox(260, y);
+    doc.fontSize(7).font('Helvetica').text('MOTOCICLETA', 275, y + 2);
+    
+    drawCheckbox(370, y);
+    doc.fontSize(7).font('Helvetica').text('MOTOCARRO', 385, y + 2);
+    
+    drawCheckbox(470, y);
+    doc.fontSize(7).font('Helvetica').text('MOTOTRICICLO', 485, y + 2);
+    y += 25;
+
+    // === SECCIONES 5-7: MARCA, LÍNEA, COMBUSTIBLE ===
+    drawBox(40, y, 150, 25, '5. MARCA', vehicle.marca || '');
+    drawBox(195, y, 150, 25, '6. LÍNEA', vehicle.datosVenta.vehiculoAdicional.linea || vehicle.modelo || '');
+    
+    doc.fontSize(7).font('Helvetica-Bold');
+    doc.text('7. COMBUSTIBLE', 355, y);
+    y += 12;
+    
+    drawCheckbox(355, y);
+    doc.fontSize(6).font('Helvetica').text('GASOLINA', 370, y + 2);
+    doc.fontSize(8).font('Helvetica-Bold').text('X', 358, y + 1); // Marcado por defecto
+    
+    drawCheckbox(420, y);
+    doc.fontSize(6).font('Helvetica').text('DIESEL', 435, y + 2);
+    
+    drawCheckbox(480, y);
+    doc.fontSize(6).font('Helvetica').text('GAS', 495, y + 2);
+    y += 15;
+    
+    drawCheckbox(355, y);
+    doc.fontSize(6).font('Helvetica').text('MIXTO', 370, y + 2);
+    
+    drawCheckbox(420, y);
+    doc.fontSize(6).font('Helvetica').text('ELÉCTRICO', 435, y + 2);
+    
+    drawCheckbox(480, y);
+    doc.fontSize(6).font('Helvetica').text('OTRO', 495, y + 2);
+    y += 25;
+
+    // === SECCIONES 8-10: COLORES, MODELO, CILINDRADA ===
+    drawBox(40, y, 120, 25, '8. COLOR', vehicle.color || '');
+    drawBox(165, y, 100, 25, '9. MODELO (AÑO)', vehicle.año?.toString() || '');
+    drawBox(270, y, 120, 25, '10. CILINDRADA (cc)', '');
+    y += 30;
+
+    // === SECCIONES 11-14 ===
+    drawBox(40, y, 120, 25, '11. CAPACIDAD Kg/Psj', vehicle.datosVenta.vehiculoAdicional.capacidad || '5');
+    
+    doc.fontSize(7).font('Helvetica-Bold');
+    doc.text('12. BLINDAJE', 170, y);
+    drawCheckbox(230, y + 5);
+    doc.fontSize(6).font('Helvetica').text('SI', 245, y + 7);
+    drawCheckbox(270, y + 5);
+    doc.fontSize(6).font('Helvetica').text('NO', 285, y + 7);
+    doc.fontSize(8).font('Helvetica-Bold').text('X', 273, y + 6); // Marcado NO por defecto
+    
+    doc.fontSize(7).font('Helvetica-Bold');
+    doc.text('13. DESMONTE BLIND.', 320, y);
+    drawCheckbox(410, y + 5);
+    doc.fontSize(6).font('Helvetica').text('SI', 425, y + 7);
+    drawCheckbox(450, y + 5);
+    doc.fontSize(6).font('Helvetica').text('NO', 465, y + 7);
+    doc.fontSize(8).font('Helvetica-Bold').text('X', 453, y + 6); // Marcado NO por defecto
+    
+    drawBox(490, y, 50, 25, '14. POTENCIA/HP', '');
+    y += 30;
+
+    // === SECCIÓN 15: CARROCERÍA ===
+    doc.fontSize(8).font('Helvetica-Bold');
+    doc.text('15. CARROCERÍA', 40, y);
+    y += 15;
+    
+    drawBox(40, y, 500, 25, 'TIPO DE CARROCERÍA', vehicle.datosVenta.vehiculoAdicional.tipoCarroceria || 'SEDÁN');
+    y += 35;
+
+    // === SECCIÓN 16: IDENTIFICACIÓN INTERNA ===
+    doc.fontSize(8).font('Helvetica-Bold');
+    doc.text('16. IDENTIFICACIÓN INTERNA DEL VEHÍCULO', 40, y);
+    y += 15;
+
+    // Número de motor
+    drawBox(40, y, 200, 25, 'No. DE MOTOR', vehicle.datosVenta.vehiculoAdicional.numeroMotor || '');
+    doc.fontSize(7).font('Helvetica-Bold');
+    doc.text('REGRABADO:', 250, y + 5);
+    drawCheckbox(310, y + 5);
+    doc.fontSize(6).font('Helvetica').text('SI', 325, y + 7);
+    drawCheckbox(350, y + 5);
+    doc.fontSize(6).font('Helvetica').text('NO', 365, y + 7);
+    doc.fontSize(8).font('Helvetica-Bold').text('X', 353, y + 6); // Marcado NO por defecto
+    y += 30;
+
+    // Número de chasis
+    drawBox(40, y, 200, 25, 'No. DE CHASIS', vehicle.vin || '');
+    doc.fontSize(7).font('Helvetica-Bold');
+    doc.text('REGRABADO:', 250, y + 5);
+    drawCheckbox(310, y + 5);
+    doc.fontSize(6).font('Helvetica').text('SI', 325, y + 7);
+    drawCheckbox(350, y + 5);
+    doc.fontSize(6).font('Helvetica').text('NO', 365, y + 7);
+    doc.fontSize(8).font('Helvetica-Bold').text('X', 353, y + 6); // Marcado NO por defecto
+    y += 30;
+
+    // Número de serie/VIN
+    drawBox(40, y, 200, 25, 'No. DE SERIE / VIN', vehicle.vin || '');
+    doc.fontSize(7).font('Helvetica-Bold');
+    doc.text('REGRABADO:', 250, y + 5);
+    drawCheckbox(310, y + 5);
+    doc.fontSize(6).font('Helvetica').text('SI', 325, y + 7);
+    drawCheckbox(350, y + 5);
+    doc.fontSize(6).font('Helvetica').text('NO', 365, y + 7);
+    doc.fontSize(8).font('Helvetica-Bold').text('X', 353, y + 6); // Marcado NO por defecto
+    y += 35;
+
+    // === SECCIÓN 17: IMPORTACIÓN O REMATE ===
+    doc.fontSize(8).font('Helvetica-Bold');
+    doc.text('17. IMPORTACIÓN O REMATE', 40, y);
+    y += 15;
+
+    drawCheckbox(40, y);
+    doc.fontSize(7).font('Helvetica').text('IMPORTACIÓN', 55, y + 2);
+    
+    drawCheckbox(140, y);
+    doc.fontSize(7).font('Helvetica').text('REMATE', 155, y + 2);
+    
+    drawBox(220, y, 80, 20, 'MANIF./ACTA', '');
+    drawBox(305, y, 80, 20, 'DEC. IMPORT.', '');
+    drawBox(390, y, 80, 20, 'ACTA', '');
+    drawBox(475, y, 65, 20, 'ENTIDAD', '');
+    y += 25;
+
+    drawBox(40, y, 150, 20, 'LUGAR (CIUDAD)', '');
+    drawBox(195, y, 80, 20, 'CÓDIGO', '');
+    drawBox(280, y, 100, 20, 'No. DOCUMENTO', '');
+    drawBox(385, y, 80, 20, 'FECHA DÍA/MES/AÑO', '');
+    y += 30;
+
+    // === SECCIÓN 18: TIPO DE SERVICIO ===
+    doc.fontSize(8).font('Helvetica-Bold');
+    doc.text('18. TIPO DE SERVICIO (Marque con X)', 40, y);
+    y += 15;
+
+    drawCheckbox(40, y);
+    doc.fontSize(7).font('Helvetica').text('PARTICULAR', 55, y + 2);
+    doc.fontSize(8).font('Helvetica-Bold').text('X', 43, y + 1); // Marcado por defecto
+    
+    drawCheckbox(130, y);
+    doc.fontSize(7).font('Helvetica').text('PÚBLICO', 145, y + 2);
+    
+    drawCheckbox(210, y);
+    doc.fontSize(7).font('Helvetica').text('DIPLOMÁTICO', 225, y + 2);
+    
+    drawCheckbox(320, y);
+    doc.fontSize(7).font('Helvetica').text('OFICIAL', 335, y + 2);
+    
+    drawCheckbox(400, y);
+    doc.fontSize(7).font('Helvetica').text('ESPECIAL', 415, y + 2);
+    
+    drawCheckbox(490, y);
+    doc.fontSize(7).font('Helvetica').text('OTROS', 505, y + 2);
+    y += 25;
+
+    // === SECCIÓN 21: DATOS DEL PROPIETARIO (VENDEDOR) ===
+    doc.fontSize(9).font('Helvetica-Bold');
+    doc.text('21. DATOS DEL PROPIETARIO ACTUAL (VENDEDOR)', 40, y);
+    y += 15;
+
+    // Apellidos y nombres
+    const apellidosVendedor = vehicle.datosVenta.vendedor.nombre.split(' ').slice(0, 2).join(' ') || '';
+    const nombresVendedor = vehicle.datosVenta.vendedor.nombre.split(' ').slice(2).join(' ') || '';
+
+    drawBox(40, y, 150, 25, 'PRIMER APELLIDO', apellidosVendedor.split(' ')[0] || '');
+    drawBox(195, y, 150, 25, 'SEGUNDO APELLIDO', apellidosVendedor.split(' ')[1] || '');
+    drawBox(350, y, 190, 25, 'NOMBRES', nombresVendedor);
+    y += 30;
+
+    // Tipo de documento
+    doc.fontSize(7).font('Helvetica-Bold');
+    doc.text('TIPO DE DOCUMENTO:', 40, y);
+    y += 12;
+
+    drawCheckbox(40, y);
+    doc.fontSize(6).font('Helvetica').text('C.C.', 55, y + 2);
+    doc.fontSize(8).font('Helvetica-Bold').text('X', 43, y + 1); // Marcado por defecto
+    
+    drawCheckbox(90, y);
+    doc.fontSize(6).font('Helvetica').text('NIT', 105, y + 2);
+    
+    drawCheckbox(140, y);
+    doc.fontSize(6).font('Helvetica').text('N.N.', 155, y + 2);
+    
+    drawCheckbox(190, y);
+    doc.fontSize(6).font('Helvetica').text('PASAPORTE', 205, y + 2);
+    
+    drawCheckbox(280, y);
+    doc.fontSize(6).font('Helvetica').text('C. EXTRANJ.', 295, y + 2);
+    
+    drawCheckbox(370, y);
+    doc.fontSize(6).font('Helvetica').text('T. IDENTI.', 385, y + 2);
+    
+    drawCheckbox(460, y);
+    doc.fontSize(6).font('Helvetica').text('NUIP', 475, y + 2);
+    y += 20;
+
+    // Número de documento
+    drawBox(40, y, 200, 25, 'No. DOCUMENTO', vehicle.datosVenta.vendedor.identificacion || '');
+    drawBox(245, y, 150, 25, 'FECHA DE EXPEDICIÓN (DD/MM/AA)', '');
+    y += 30;
+
+    // Dirección, ciudad, teléfono
+    drawBox(40, y, 250, 25, 'DIRECCIÓN', vehicle.datosVenta.vendedor.direccion || '');
+    drawBox(295, y, 120, 25, 'CIUDAD', '');
+    drawBox(420, y, 120, 25, 'TELÉFONO', vehicle.datosVenta.vendedor.telefono || '');
+    y += 35;
+
+    // Firma del propietario
+    doc.fontSize(8).font('Helvetica-Bold');
+    doc.text('FIRMA DEL PROPIETARIO:', 40, y);
+    y += 20;
+    
+    // Línea para firma
+    doc.moveTo(40, y).lineTo(300, y).stroke();
+    y += 10;
+    doc.fontSize(7).font('Helvetica');
+    doc.text('(Firma del vendedor actual)', 40, y);
+
+    // === PÁGINA 2: DATOS DEL COMPRADOR Y DOCUMENTOS ===
+    doc.addPage();
+    y = 30;
+
+    // === SECCIÓN 21 (CONTINUACIÓN): DATOS DEL COMPRADOR ===
+    doc.fontSize(9).font('Helvetica-Bold');
+    doc.text('21. DATOS DEL NUEVO PROPIETARIO (COMPRADOR)', 40, y);
+    y += 15;
+
+    // Apellidos y nombres del comprador
+    const apellidosComprador = vehicle.datosVenta.comprador.nombre.split(' ').slice(0, 2).join(' ') || '';
+    const nombresComprador = vehicle.datosVenta.comprador.nombre.split(' ').slice(2).join(' ') || '';
+
+    drawBox(40, y, 150, 25, 'PRIMER APELLIDO', apellidosComprador.split(' ')[0] || '');
+    drawBox(195, y, 150, 25, 'SEGUNDO APELLIDO', apellidosComprador.split(' ')[1] || '');
+    drawBox(350, y, 190, 25, 'NOMBRES', nombresComprador);
+    y += 30;
+
+    // Tipo de documento comprador
+    doc.fontSize(7).font('Helvetica-Bold');
+    doc.text('TIPO DE DOCUMENTO:', 40, y);
+    y += 12;
+
+    drawCheckbox(40, y);
+    doc.fontSize(6).font('Helvetica').text('C.C.', 55, y + 2);
+    doc.fontSize(8).font('Helvetica-Bold').text('X', 43, y + 1); // Marcado por defecto
+    
+    drawCheckbox(90, y);
+    doc.fontSize(6).font('Helvetica').text('NIT', 105, y + 2);
+    
+    drawCheckbox(140, y);
+    doc.fontSize(6).font('Helvetica').text('N.N.', 155, y + 2);
+    
+    drawCheckbox(190, y);
+    doc.fontSize(6).font('Helvetica').text('PASAPORTE', 205, y + 2);
+    
+    drawCheckbox(280, y);
+    doc.fontSize(6).font('Helvetica').text('C. EXTRANJ.', 295, y + 2);
+    
+    drawCheckbox(370, y);
+    doc.fontSize(6).font('Helvetica').text('T. IDENTI.', 385, y + 2);
+    
+    drawCheckbox(460, y);
+    doc.fontSize(6).font('Helvetica').text('NUIP', 475, y + 2);
+    y += 20;
+
+    // Número de documento comprador
+    drawBox(40, y, 200, 25, 'No. DOCUMENTO', vehicle.datosVenta.comprador.identificacion || '');
+    drawBox(245, y, 150, 25, 'FECHA DE EXPEDICIÓN (DD/MM/AA)', '');
+    y += 30;
+
+    // Dirección, ciudad, teléfono comprador
+    drawBox(40, y, 250, 25, 'DIRECCIÓN', vehicle.datosVenta.comprador.direccion || '');
+    drawBox(295, y, 120, 25, 'CIUDAD', '');
+    drawBox(420, y, 120, 25, 'TELÉFONO', vehicle.datosVenta.comprador.telefono || '');
+    y += 35;
+
+    // Firma del comprador
+    doc.fontSize(8).font('Helvetica-Bold');
+    doc.text('FIRMA DEL NUEVO PROPIETARIO:', 40, y);
+    y += 20;
+    
+    // Línea para firma
+    doc.moveTo(40, y).lineTo(300, y).stroke();
+    y += 10;
+    doc.fontSize(7).font('Helvetica');
+    doc.text('(Firma del comprador)', 40, y);
+    y += 40;
+
+    // === CHECKLIST DE DOCUMENTOS ===
+    doc.fontSize(12).font('Helvetica-Bold');
+    doc.text('CHECKLIST DE DOCUMENTOS REQUERIDOS', 40, y, { align: 'center', width: 500 });
+    y += 25;
+
+    const documentos = [
+      '□ Tarjeta de propiedad del vehículo (original)',
+      '□ Certificado de tradición y libertad (vigente)',
+      '□ SOAT vigente',
+      '□ Revisión técnico-mecánica vigente',
+      '□ Certificado de emisiones (si aplica)',
+      '□ Fotocopia de la cédula del vendedor (ampliada al 150%)',
+      '□ Fotocopia de la cédula del comprador (ampliada al 150%)',
+      '□ Poder especial si el trámite lo realiza un tercero',
+      '□ Formulario de traspaso debidamente diligenciado',
+      '□ Recibo de pago de los derechos de trámite'
+    ];
+
+    doc.fontSize(10).font('Helvetica');
+    documentos.forEach((docItem) => {
+      doc.text(docItem, 60, y);
+      y += 18;
+    });
+
+    y += 20;
+
+    // === NOTAS IMPORTANTES ===
+    doc.fontSize(11).font('Helvetica-Bold');
+    doc.text('NOTAS IMPORTANTES:', 40, y);
+    y += 20;
+
+    doc.fontSize(9).font('Helvetica');
+    const notas = [
+      '1. Todos los documentos deben estar vigentes al momento de realizar el trámite.',
+      '2. El vendedor debe presentar la tarjeta de propiedad original.',
+      '3. Las fotocopias de cédulas deben estar ampliadas al 150% y ser legibles.',
+      '4. El traspaso debe realizarse dentro del plazo establecido en el contrato.',
+      '5. Para más información, visite www.runt.gov.co'
+    ];
+
+    notas.forEach((nota) => {
+      doc.text(nota, 40, y, { align: 'justify', width: 500 });
+      y += 15;
+    });
+
+    y += 30;
+
+    // Pie de página
+    doc.fontSize(8).font('Helvetica-Oblique');
+    doc.text('Este formulario es un documento oficial para trámites ante el Registro Nacional Automotor - RUNT.', 40, y, { align: 'center', width: 500 });
+
+    // Finalizar el documento
+    doc.end();
+
+  } catch (error: any) {
+    console.error('Error al generar formulario de traspaso:', error);
+    res.status(500).json({ 
+      message: 'Error al generar formulario de traspaso', 
+      error: error.message 
+    });
+  }
+};

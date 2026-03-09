@@ -1,0 +1,54 @@
+========================================
+COMANDO PARA EJECUTAR EN RENDER SHELL
+========================================
+
+Copia y pega este comando en el Shell de Render:
+
+node scripts/crear-admin-inicial.js
+
+========================================
+NOTA IMPORTANTE:
+========================================
+
+El Shell ya está en la carpeta /project/src
+Por eso el comando es:
+  node scripts/crear-admin-inicial.js
+
+NO uses "backend/" al inicio porque ya estás dentro del proyecto.
+
+========================================
+DESPUÉS DE EJECUTAR:
+========================================
+
+Deberías ver un mensaje como:
+
+✅ Usuario admin creado exitosamente
+Email: admin@compraventa.com  
+Password: admin123
+
+========================================
+SI HAY ERROR:
+========================================
+
+Si dice "Cannot find module", intenta:
+
+cd ..
+node backend/scripts/crear-admin-inicial.js
+
+O también puedes intentar:
+
+npm run create-admin
+
+========================================
+SIGUIENTE PASO:
+========================================
+
+Una vez creado el admin:
+
+1. Configurar VITE_API_URL en Vercel
+2. Login en la app con:
+   - Email: admin@compraventa.com
+   - Password: admin123
+3. ¡Ver toda tu información!
+
+========================================

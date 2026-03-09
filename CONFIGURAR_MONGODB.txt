@@ -1,0 +1,44 @@
+========================================
+CONFIGURACIÓN DE MONGODB - INSTRUCCIONES
+========================================
+
+¡IMPORTANTE! Debes actualizar el archivo backend/.env manualmente.
+
+PASOS:
+
+1. Abre el archivo: backend/.env
+
+2. Busca la línea que dice:
+   MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/compraventa-vehiculos?retryWrites=true&w=majority
+
+3. Reemplázala COMPLETAMENTE con esta línea:
+   MONGODB_URI=mongodb+srv://mvillacar:mvillacar123@mvillacar.1uocybr.mongodb.net/compraventa-vehiculos?retryWrites=true&w=majority&appName=mvillacar
+
+4. Guarda el archivo (Ctrl+S)
+
+========================================
+
+El archivo backend/.env debe quedar así:
+
+# Puerto del servidor
+PORT=5000
+
+# MongoDB Atlas Connection String
+MONGODB_URI=mongodb+srv://mvillacar:mvillacar123@mvillacar.1uocybr.mongodb.net/compraventa-vehiculos?retryWrites=true&w=majority&appName=mvillacar
+
+# JWT Secret (cambia esto por una clave segura y única)
+JWT_SECRET=compraventa_vehiculos_secret_key_2024_super_segura
+
+# Entorno
+NODE_ENV=development
+
+========================================
+
+DESPUÉS DE GUARDAR EL ARCHIVO:
+
+1. Haz doble clic en: iniciar-backend.bat
+2. Espera a ver: "✅ MongoDB conectado exitosamente"
+3. Haz doble clic en: iniciar-frontend.bat
+4. Abre tu navegador en: http://localhost:3000
+
+¡Listo!

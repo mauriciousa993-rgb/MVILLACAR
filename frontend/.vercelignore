@@ -1,0 +1,4 @@
+# Archivos a ignorar en Vercel
+node_modules
+.git
+*.log

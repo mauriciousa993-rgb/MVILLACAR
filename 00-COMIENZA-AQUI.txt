@@ -1,0 +1,173 @@
+╔════════════════════════════════════════════════════════════╗
+║     🚀 DESPLIEGUE AUTOMÁTICO - GUÍA MAESTRA 🚀            ║
+║                                                            ║
+║  Tu aplicación en Internet en 30 minutos                  ║
+╚════════════════════════════════════════════════════════════╝
+
+🎯 URL FINAL (al terminar):
+═══════════════════════════════════════════════════════════════
+
+        https://compraventa-vehiculos.vercel.app
+
+Accesible desde cualquier móvil en el mundo ✅
+
+════════════════════════════════════════════════════════════
+
+⏱️  TIEMPO ESTIMADO: 30 minutos
+
+- Paso 1 (GitHub): 5 min
+- Paso 2 (MongoDB): 10 min (incluye espera)
+- Paso 3 (Render): 10 min (incluye espera)
+- Paso 4 (Vercel): 5 min
+- TOTAL: ~30 minutos
+
+════════════════════════════════════════════════════════════
+
+📋 CHECKLIST DE PASOS
+
+Ejecuta en orden:
+
+[ ] PASO 1: Ejecuta: 01-setup-github.bat
+    ↓ Te pedirá URL de GitHub
+    ↓ Genera tu GitHub URL aquí: https://github.com/new
+
+[ ] PASO 2: Lee: 02-mongodb-atlas.txt
+    ↓ Sigue pasos manualmente
+    ↓ Obtén tu MONGODB_URI
+
+[ ] PASO 3: Lee: 03-deploy-render.txt
+    ↓ Sigue pasos manualmente
+    ↓ Obtén tu URL de Render
+
+[ ] PASO 4: Lee: 04-deploy-vercel.txt
+    ↓ Sigue pasos manualmente
+    ↓ Obtén tu URL de Vercel final
+
+[ ] PASO 5: Prueba tu aplicación
+    ↓ Abre: https://compraventa-vehiculos.vercel.app
+    ↓ Crea una cuenta
+    ↓ ¡Listo!
+
+════════════════════════════════════════════════════════════
+
+📁 ARCHIVOS DE DESPLIEGUE
+
+01-setup-github.bat ..................... Ejecuta primero
+02-mongodb-atlas.txt .................... Lee y sigue
+03-deploy-render.txt .................... Lee y sigue
+04-deploy-vercel.txt .................... Lee y sigue
+generar-jwt-secret.bat .................. Para generar secreto
+verificar-configuracion.js .............. Para verificar setup
+
+════════════════════════════════════════════════════════════
+
+🔑 DATOS QUE NECESITARÁS
+
+Para seguir adelante, necesitarás:
+
+1. EMAIL: tu@email.com
+   → Usado en GitHub, MongoDB, Render, Vercel
+
+2. GITHUB URL: https://github.com/TU_USUARIO/app-compraventa
+   → Creada en paso 1
+
+3. MONGODB_URI: mongodb+srv://adminuser:...
+   → Obtén en paso 2
+
+4. JWT_SECRET: (generado y copiado)
+   → Genera con: generar-jwt-secret.bat
+
+5. RENDER URL: https://compraventa-backend.onrender.com
+   → Obtén en paso 3
+
+════════════════════════════════════════════════════════════
+
+⚡ INICIO RÁPIDO
+
+1. Abre una terminal en esta carpeta
+
+2. Ejecuta:
+   01-setup-github.bat
+
+3. Sigue las instrucciones en los archivos .txt
+
+4. ¡Listo!
+
+════════════════════════════════════════════════════════════
+
+✏️  GUARDA AQUÍ TUS DATOS
+
+Completa estos campos mientras avanzas:
+
+GITHUB:
+URL: _________________________________________________________
+Usuario: _____________________________________________________
+
+MONGODB:
+MONGODB_URI: __________________________________________________
+_____________________________________________________________
+Password: ____________________________________________________
+
+JWT:
+JWT_SECRET: ___________________________________________________
+_____________________________________________________________
+
+RENDER:
+Backend URL: __________________________________________________
+
+VERCEL:
+Frontend URL: _________________________________________________
+
+════════════════════════════════════════════════════════════
+
+🛠️  REQUISITOS
+
+✓ Node.js instalado (npm)
+✓ Git instalado
+✓ Navegador web
+✓ Email válido
+
+════════════════════════════════════════════════════════════
+
+❓ CÓMO EMPEZAR
+
+1. Lee este archivo completo
+2. Abre terminal aquí
+3. Ejecuta: 01-setup-github.bat
+4. Sigue las instrucciones en los archivos .txt
+
+════════════════════════════════════════════════════════════
+
+🆘 SI ALGO FALLA
+
+1. Lee el archivo de Solución de Problemas
+2. Verifica que completaste todos los pasos
+3. Revisa los logs en Render/Vercel dashboard
+4. Intenta de nuevo
+
+════════════════════════════════════════════════════════════
+
+🎉 RESULTADO FINAL
+
+Tu aplicación estará:
+
+✅ En línea 24/7
+✅ Accesible desde cualquier móvil
+✅ Con HTTPS seguro
+✅ Con base de datos en la nube
+✅ Escalable según demanda
+✅ GRATIS (planes gratuitos)
+
+════════════════════════════════════════════════════════════
+
+👉 SIGUIENTE PASO
+
+Ejecuta en terminal (en esta carpeta):
+
+    01-setup-github.bat
+
+Y sigue las instrucciones.
+
+════════════════════════════════════════════════════════════
+
+¡Listo para desplegar! 🚀

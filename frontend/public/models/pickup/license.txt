@@ -1,0 +1,11 @@
+Model Information:
+* title:	pickup
+* source:	https://sketchfab.com/3d-models/pickup-624e583ed005401881b200a26a7f226f
+* author:	taeemtasbi (https://sketchfab.com/taeemtasbi)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "pickup" (https://sketchfab.com/3d-models/pickup-624e583ed005401881b200a26a7f226f) by taeemtasbi (https://sketchfab.com/taeemtasbi) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

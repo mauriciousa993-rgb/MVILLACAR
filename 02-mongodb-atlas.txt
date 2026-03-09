@@ -1,0 +1,129 @@
+╔════════════════════════════════════════════════════════════╗
+║        DESPLIEGUE PASO 2: MONGODB ATLAS                    ║
+╚════════════════════════════════════════════════════════════╝
+
+📌 TIEMPO: 10-15 minutos
+⚠️  IMPORTANTE: Debes completar MongoDB ANTES de Render
+
+════════════════════════════════════════════════════════════
+
+🔧 PASO 1: Crear Cuenta MongoDB Atlas
+
+1. Abre: https://www.mongodb.com/cloud/atlas
+
+2. Click en "Sign Up" (esquina superior derecha)
+
+3. Llena el formulario:
+   - Email: tu_email@example.com
+   - Password: contraseña fuerte
+   - First Name: Tu nombre
+   - Company Name: Tu empresa (o similar)
+   - ✓ Acepta términos
+
+4. Click en "Sign Up"
+
+5. Verifica tu EMAIL (revisa spam si no aparece)
+
+════════════════════════════════════════════════════════════
+
+🔧 PASO 2: Crear Proyecto
+
+1. En el dashboard, haz click en "+ New Project"
+
+2. Nombre del proyecto: compraventa-vehiculos
+
+3. Selecciona la organización (la que se creó automáticamente)
+
+4. Click en "Next"
+
+5. Invita a miembros (SKIP - no necesario)
+
+6. Click en "Create Project"
+
+════════════════════════════════════════════════════════════
+
+🔧 PASO 3: Crear Cluster (Base de Datos)
+
+1. Click en "Build a Database" (botón grande)
+
+2. Selecciona: M0 Sandbox (Gratis - es perfecta)
+
+3. Cloud Provider: AWS (por defecto)
+
+4. Región: us-east-1 (por defecto)
+
+5. Cluster Name: compraventa-cluster
+
+6. Click en "Create Deployment"
+
+7. Selecciona:
+   - Username: adminuser
+   - Password: GeneraUnaContraseña123!
+   
+8. Click en "Create User"
+
+9. Agrega tu IP address:
+   - Click en "My Local Environment"
+   - Click en "Add My Current IP Address"
+   - O más fácil: Agrega 0.0.0.0/0 para permitir todas las IPs
+   
+10. Click en "Finish and Close"
+
+⏳ ESPERA 10-15 MINUTOS mientras se crea el cluster
+   (Es normal, puede tardar)
+
+════════════════════════════════════════════════════════════
+
+🔧 PASO 4: Obtener Connection String
+
+1. Cuando esté listo el cluster, haz click en "Connect"
+
+2. Selecciona: "Connect your application"
+
+3. Elige: Node.js (versión 3.6 or later)
+
+4. Copia la connection string:
+   mongodb+srv://adminuser:<password>@compraventa-cluster.xxxxx.mongodb.net/?retryWrites=true&w=majority
+
+5. Reemplaza <password> con tu contraseña (GeneraUnaContraseña123!)
+
+EJEMPLO:
+mongodb+srv://adminuser:GeneraUnaContraseña123!@compraventa-cluster.xxxxx.mongodb.net/compraventa-vehiculos?retryWrites=true&w=majority
+
+6. COPIA ESTA STRING COMPLETA
+   (La usarás en Render y Vercel)
+
+════════════════════════════════════════════════════════════
+
+✅ VERIFICACIÓN
+
+MongoDB está listo si:
+- ✓ Ves tu cluster en el dashboard
+- ✓ El estado dice "Running"
+- ✓ Tienes tu MONGODB_URI copiada
+
+════════════════════════════════════════════════════════════
+
+⚠️  IMPORTANTE
+
+NO PIERDAS:
+- Tu MONGODB_URI (la connection string)
+- Tu contraseña (adminuser / GeneraUnaContraseña123!)
+
+Los usarás en los próximos pasos.
+
+════════════════════════════════════════════════════════════
+
+✏️  GUARDA AQUÍ:
+
+MONGODB_URI: 
+________________________________________________________________
+________________________________________________________________
+
+PASSWORD: GeneraUnaContraseña123!
+
+════════════════════════════════════════════════════════════
+
+👉 SIGUIENTE PASO: Desplegar en Render
+
+Lee: 03-deploy-render.txt

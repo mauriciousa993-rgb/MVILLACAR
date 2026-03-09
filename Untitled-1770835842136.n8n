@@ -1,0 +1,76 @@
+{
+  "updatedAt": "2026-02-11T18:51:54.868Z",
+  "createdAt": "2026-02-11T18:50:42.623Z",
+  "id": "XTGFK6N0oCU1ThqU",
+  "name": "Untitled-1770835842136",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [],
+  "connections": {},
+  "settings": {
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "bbcd7de5-2d5a-4cd9-b29b-883a3a80b0cf",
+  "activeVersionId": null,
+  "versionCounter": 2,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-02-11T18:50:42.629Z",
+      "createdAt": "2026-02-11T18:50:42.629Z",
+      "role": "workflow:owner",
+      "workflowId": "XTGFK6N0oCU1ThqU",
+      "projectId": "ePmJecPaI2bUlNvY",
+      "project": {
+        "updatedAt": "2026-02-02T21:33:29.117Z",
+        "createdAt": "2026-02-02T21:31:56.560Z",
+        "id": "ePmJecPaI2bUlNvY",
+        "name": "Edgar gomez <mauricio.usa993@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "540542bb-cfe7-497f-a144-ddbdb684fd7c",
+        "projectRelations": [
+          {
+            "updatedAt": "2026-02-02T21:31:56.560Z",
+            "createdAt": "2026-02-02T21:31:56.560Z",
+            "userId": "540542bb-cfe7-497f-a144-ddbdb684fd7c",
+            "projectId": "ePmJecPaI2bUlNvY",
+            "user": {
+              "updatedAt": "2026-02-11T18:40:11.000Z",
+              "createdAt": "2026-02-02T21:31:56.349Z",
+              "id": "540542bb-cfe7-497f-a144-ddbdb684fd7c",
+              "email": "mauricio.usa993@gmail.com",
+              "firstName": "Edgar",
+              "lastName": "gomez",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2026-02-02T21:33:53.472Z",
+                "personalization_survey_n8n_version": "2.6.3",
+                "companySize": "<20",
+                "companyType": "ecommerce",
+                "role": "business-owner",
+                "reportedSource": "google"
+              },
+              "settings": {
+                "userActivated": false,
+                "easyAIWorkflowOnboarded": true
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2026-02-11",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": null
+}

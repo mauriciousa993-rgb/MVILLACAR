@@ -1,0 +1,91 @@
+🚀 CONFIGURACION VERCEL (Frontend)
+═════════════════════════════════════════════════════════════
+
+⚠️ HACER ESTO DESPUES QUE RENDER ESTÉ LISTO ⚠️
+
+Cuando veas en Render: ✅ "Your service is live"
+
+Tu URL de Render será algo como:
+https://compraventa-backend.onrender.com
+
+═════════════════════════════════════════════════════════════
+
+📋 PASOS PARA VERCEL:
+
+1. Ve a: https://vercel.com
+2. Haz login con GitHub o crea cuenta
+3. Click en "Add New" → "Project"
+
+═════════════════════════════════════════════════════════════
+
+4. SELECCIONA TU REPOSITORIO:
+
+   - Deberías ver: app-compraventa
+   - Click en él
+
+═════════════════════════════════════════════════════════════
+
+5. CONFIGURACIÓN DEL PROYECTO:
+
+Framework Preset: Vite
+Root Directory: ./frontend
+Build Command: npm install && npm run build
+Output Directory: dist
+Install Command: npm install
+
+═════════════════════════════════════════════════════════════
+
+6. VARIABLES DE ENTORNO:
+
+   Click en "Environment Variables"
+   Agrega 1 variable:
+
+   Name: VITE_API_URL
+   Value: https://compraventa-backend.onrender.com/api
+   
+   (Reemplaza con tu URL ACTUAL de Render)
+
+   ✓ Save
+
+═════════════════════════════════════════════════════════════
+
+7. CLICK EN "DEPLOY"
+
+   Espera 5-10 minutos
+
+   Verás:
+   - "Analyzing project..."
+   - "Building..."
+   - "Installing dependencies..."
+   - "Building..."
+   - Cuando termine: ✅ "Success"
+
+═════════════════════════════════════════════════════════════
+
+✅ RESULTADO FINAL:
+
+Vercel te dará una URL como:
+https://compraventa-vehiculos.vercel.app
+
+(O el nombre que hayas elegido)
+
+═════════════════════════════════════════════════════════════
+
+✅ VERIFICACIÓN:
+
+1. Abre: https://compraventa-vehiculos.vercel.app
+2. Deberías ver la página de LOGIN
+3. Intenta hacer Login:
+   - Email: test@example.com
+   - Password: Password123
+
+Si ves el dashboard: ✅ TODO FUNCIONA
+
+═════════════════════════════════════════════════════════════
+
+🎉 TU APP ESTARÁ EN INTERNET
+
+Accesible desde cualquier móvil:
+https://compraventa-vehiculos.vercel.app
+
+═════════════════════════════════════════════════════════════

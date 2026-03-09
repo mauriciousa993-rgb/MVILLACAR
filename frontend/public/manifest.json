@@ -1,0 +1,26 @@
+{
+  "name": "Compraventa de Vehículos - Sistema de Gestión",
+  "short_name": "AutoTech",
+  "description": "Sistema completo de gestión de inventario y compraventa de vehículos",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "orientation": "portrait",
+  "scope": "/",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "autotech-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "autotech-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

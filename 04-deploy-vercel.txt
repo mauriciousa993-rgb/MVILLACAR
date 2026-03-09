@@ -1,0 +1,141 @@
+🚀 PASO 3: DESPLEGAR EN VERCEL (Frontend)
+═════════════════════════════════════════════════════════════
+
+✅ Tu backend está en Render en:
+   https://compraventa-backend.onrender.com
+
+Ahora necesitas desplegar tu frontend en Vercel.
+
+═════════════════════════════════════════════════════════════
+
+⚠️  IMPORTANTE:
+
+Tu GitHub está en:
+https://github.com/mauriciousa993-rgb/app-compraventa
+
+Y tu Render URL es:
+https://compraventa-backend.onrender.com
+
+═════════════════════════════════════════════════════════════
+
+📋 PASOS PARA DESPLEGAR EN VERCEL
+
+1️⃣  Abre: https://vercel.com
+
+2️⃣  Click en "Sign up with GitHub"
+   - Autoriza Vercel para acceder a tu GitHub
+   - Completa tu perfil
+
+3️⃣  En el dashboard, click en "Add New"
+
+4️⃣  Selecciona "Project"
+
+5️⃣  En "Import Git Repository":
+   - Busca: app-compraventa
+   - Haz click en ella
+   - Click "Import"
+
+6️⃣  Configura el Proyecto:
+   
+   Vercel sugiere automáticamente:
+   Project Name:        app-compraventa (está bien)
+   Framework Preset:    Vite ✅ (asegúrate que sea Vite)
+   Root Directory:      frontend ✅ (MUY IMPORTANTE)
+   Build Command:       npm run build (está bien)
+   Output Directory:    dist (está bien)
+   Install Command:     npm install (está bien)
+
+   Si no aparecen, ve a "Project Settings" y configúralos
+
+7️⃣  Environment Variables:
+   
+   Scroll hacia abajo a "Environment Variables"
+   
+   Agrega esta variable:
+   
+   - Name: VITE_API_URL
+   - Value: https://compraventa-backend.onrender.com/api
+   
+   (Reemplaza con tu URL real de Render)
+   
+   ⚠️  IMPORTANTE: Incluye "/api" al final
+
+8️⃣  Click en el botón azul "Deploy"
+
+9️⃣  ESPERA 5-10 MINUTOS mientras Vercel compila
+
+   Verás:
+   - "Building..."
+   - Varios logs
+   
+   Cuando termine verás:
+   ✓ "Congratulations! Your project has been successfully deployed"
+   ✓ Una URL como: https://compraventa-vehiculos.vercel.app
+
+═════════════════════════════════════════════════════════════
+
+✅ VERIFICACIÓN - Que todo funciona
+
+1. Abre en el navegador:
+   https://compraventa-vehiculos.vercel.app
+
+2. Deberías ver:
+   ✓ Página de Login
+   ✓ Campo de Email
+   ✓ Campo de Contraseña
+   ✓ Botón "Crear cuenta"
+   ✓ Botón "Inicia sesión"
+
+3. Intenta registrarte:
+   - Email: test@example.com
+   - Contraseña: Test123456
+   - Nombre: Tu nombre
+
+4. Si funciona: ✅ ¡EXCELENTE!
+
+5. Intenta hacer login con esos datos
+
+═════════════════════════════════════════════════════════════
+
+❌ Si ves página en blanco o error:
+
+1. Abre F12 (tecla F12)
+2. Ve a la pestaña "Console"
+3. Busca errores rojos
+4. Verifica que VITE_API_URL sea correcto en Vercel
+5. Espera 2-3 minutos y recarga la página
+
+═════════════════════════════════════════════════════════════
+
+📌 GUARDA AQUÍ TU VERCEL URL:
+
+Frontend URL: https://compraventa-vehiculos.vercel.app
+
+(Esta es tu URL final para compartir)
+
+═════════════════════════════════════════════════════════════
+
+🎉 ¡LISTO! TU APP ESTÁ EN INTERNET
+
+═════════════════════════════════════════════════════════════
+
+URLs Finales:
+- Frontend: https://compraventa-vehiculos.vercel.app
+- Backend: https://compraventa-backend.onrender.com
+- API: https://compraventa-backend.onrender.com/api
+
+═════════════════════════════════════════════════════════════
+
+📱 COMPARTIR CON OTROS
+
+Comparte esta URL con quien quieras:
+
+https://compraventa-vehiculos.vercel.app
+
+Pueden acceder desde:
+✅ Cualquier móvil
+✅ Cualquier PC
+✅ Cualquier país
+✅ Con WiFi o datos móviles
+
+═════════════════════════════════════════════════════════════

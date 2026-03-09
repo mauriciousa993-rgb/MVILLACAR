@@ -1,0 +1,11 @@
+Model Information:
+* title:	Benz Suv model
+* source:	https://sketchfab.com/3d-models/benz-suv-model-95f49ef3cd5c418b9a7232779165753e
+* author:	sarang krishna (https://sketchfab.com/sarangkrishna)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Benz Suv model" (https://sketchfab.com/3d-models/benz-suv-model-95f49ef3cd5c418b9a7232779165753e) by sarang krishna (https://sketchfab.com/sarangkrishna) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

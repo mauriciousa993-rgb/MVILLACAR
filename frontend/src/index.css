@@ -1,0 +1,172 @@
+@import url("https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-base: #121212;
+  --bg-elevated: #1a1a1b;
+  --surface: #1e1e1e;
+  --surface-hover: #252528;
+  --surface-soft: #16181c;
+  --text-main: #e4e4e4;
+  --text-strong: #ffffff;
+  --text-muted: #a1a1aa;
+  --accent: #e31b23;
+  --accent-bright: #ff3b30;
+  --border-soft: #2c2f36;
+  --silver: #c8ccd1;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  font-family: "Rajdhani", "Segoe UI", Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--text-main);
+  background:
+    radial-gradient(circle at 20% 15%, #202538 0%, transparent 35%),
+    radial-gradient(circle at 80% 0%, #30161b 0%, transparent 32%),
+    var(--bg-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary-500 hover:bg-primary-400 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 border border-primary-400;
+    box-shadow: 0 0 0 1px rgba(227, 27, 35, 0.4), 0 12px 24px -18px rgba(255, 59, 48, 0.85);
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 0 0 1px rgba(255, 59, 48, 0.6), 0 14px 28px -16px rgba(255, 59, 48, 0.95);
+  }
+
+  .btn-secondary {
+    @apply bg-surface-700 hover:bg-surface-600 text-ink-100 font-medium py-2 px-4 rounded-lg transition-colors duration-200 border border-[#2f3238];
+  }
+
+  .btn-danger {
+    @apply bg-primary-600 hover:bg-primary-500 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 border border-primary-400;
+  }
+
+  .input {
+    @apply w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-ink-100;
+    background-color: var(--surface-soft);
+    border-color: var(--border-soft);
+  }
+
+  .input-field {
+    @apply w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-ink-100;
+    background-color: var(--surface-soft);
+    border-color: var(--border-soft);
+  }
+
+  .card {
+    @apply rounded-xl p-6 border transition-all duration-200;
+    background-color: var(--surface);
+    border-color: var(--border-soft);
+    box-shadow: 0 12px 36px -28px rgba(0, 0, 0, 0.9);
+  }
+
+  .card:hover {
+    border-color: rgba(255, 59, 48, 0.35);
+    box-shadow: 0 0 0 1px rgba(255, 59, 48, 0.25), 0 24px 40px -30px rgba(255, 59, 48, 0.7);
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border;
+    border-color: #383c45;
+    background-color: #1a1c21;
+    color: var(--text-main);
+  }
+
+  .badge-success {
+    @apply border-[#4b5563] bg-[#1f252c] text-[#c8ccd1];
+  }
+
+  .badge-warning {
+    @apply border-[#6b4f2c] bg-[#2d2417] text-[#f4c26b];
+  }
+
+  .badge-danger {
+    @apply border-primary-500/50 bg-primary-900/40 text-primary-300;
+  }
+
+  .badge-info {
+    @apply border-[#375b80] bg-[#17212f] text-[#83b3e5];
+  }
+
+  .badge-gray {
+    @apply border-[#4b5563] bg-[#1e2128] text-[#a5afbc];
+  }
+}
+
+@layer utilities {
+  /* Modal dark theme support */
+  .bg-surface-900 .bg-white {
+    background-color: var(--surface) !important;
+  }
+
+  .bg-surface-900 .text-gray-900 {
+    color: var(--text-strong) !important;
+  }
+
+  .bg-surface-900 .text-gray-800,
+  .bg-surface-900 .text-gray-700 {
+    color: var(--text-main) !important;
+  }
+
+  .bg-surface-900 .text-gray-600,
+  .bg-surface-900 .text-gray-500,
+  .bg-surface-900 .text-gray-400 {
+    color: var(--text-muted) !important;
+  }
+
+  .bg-surface-900 .border-gray-300,
+  .bg-surface-900 .border-gray-200 {
+    border-color: var(--border-soft) !important;
+  }
+
+  .bg-surface-900 .bg-gray-50 {
+    background-color: #1a1d23 !important;
+  }
+
+  /* Force black text for specific modals like Commission and Separation */
+  .modal-light {
+    background-color: #ffffff !important;
+  }
+  
+  .modal-light .text-gray-900,
+  .modal-light .text-gray-800,
+  .modal-light .text-gray-700 {
+    color: #000000 !important;
+  }
+  
+  .modal-light .text-gray-600,
+  .modal-light .text-gray-500 {
+    color: #374151 !important;
+  }
+  
+  .modal-light .border-gray-200,
+  .modal-light .border-gray-300 {
+    border-color: #d1d5db !important;
+  }
+  
+  .modal-light input,
+  .modal-light textarea,
+  .modal-light select {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border-color: #d1d5db !important;
+  }
+}

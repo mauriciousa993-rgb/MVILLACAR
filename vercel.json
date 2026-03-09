@@ -1,0 +1,53 @@
+{
+  "version": 2,
+  "installCommand": "cd frontend && npm install",
+  "buildCommand": "cd frontend && npm run build",
+  "outputDirectory": "frontend/dist",
+  "framework": "vite",
+  "headers": [
+    {
+      "source": "/index.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0"
+        }
+      ]
+    },
+    {
+      "source": "/sw.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/models/suv-model.fbx",
+      "destination": "/models/suv.fbx"
+    },
+    {
+      "source": "/models/pickup-model.fbx",
+      "destination": "/models/pickup.fbx"
+    },
+    {
+      "source": "/models/hatchback-model.fbx",
+      "destination": "/models/hatchback.fbx"
+    },
+    {
+      "source": "/models/sedan-model.fbx",
+      "destination": "/models/sedan.fbx"
+    },
+    {
+      "source": "/models/ren%20carV3.fbx",
+      "destination": "/models/ren-car-v3.fbx"
+    },
+    {
+      "source": "/((?!.*\\..*).*)",
+      "destination": "/index.html"
+    }
+  ]
+}
