@@ -469,7 +469,11 @@ const VehicleList: React.FC = () => {
           {filteredVehicles.map((vehicle) => {
             const isExpanded = expandedVehicles.has(vehicle._id);
             const utilidad = vehicle.precioVenta - vehicle.precioCompra - (vehicle.gastos?.total || 0);
-            
+            const gastosInversionistas = vehicle.inversionistas?.reduce((sum, inv) => {
+              const totalGastosInv = inv.gastos?.reduce((s, g) => s + (g.monto || 0), 0) || 0;
+              return sum + totalGastosInv;
+            }, 0) || 0;
+             
             return (
               <div key={vehicle._id} className="card hover:shadow-md transition-all">
                 {/* Encabezado Compacto - Siempre Visible */}
@@ -565,16 +569,9 @@ const VehicleList: React.FC = () => {
                           </span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-ink-200">Gastos Totales:</span>
+                          <span className="text-ink-200">Gastos Inversionistas:</span>
                           <span className="font-medium text-orange-600">
-                            {formatCurrency((() => {
-                              const gastosVehiculo = vehicle.gastos?.total || 0;
-                              const gastosInversionistas = vehicle.inversionistas?.reduce((sum, inv) => {
-                                const totalGastosInv = inv.gastos?.reduce((s, g) => s + (g.monto || 0), 0) || 0;
-                                return sum + totalGastosInv;
-                              }, 0) || 0;
-                              return gastosVehiculo + gastosInversionistas;
-                            })())}
+                            {formatCurrency(gastosInversionistas)}
                           </span>
                         </div>
                         <div className="flex justify-between text-sm border-t pt-2">
@@ -648,74 +645,6 @@ const VehicleList: React.FC = () => {
                         </div>
                       </div>
                     </div>
-
-                    {/* Desglose de Gastos */}
-                    {vehicle.gastos && (vehicle.gastos.pintura > 0 || vehicle.gastos.mecanica > 0 || vehicle.gastos.traspaso > 0 || 
-                                        vehicle.gastos.alistamiento > 0 || vehicle.gastos.tapiceria > 0 || vehicle.gastos.transporte > 0 || vehicle.gastos.varios > 0) && (
-                      <div>
-                        <h4 className="text-sm font-semibold text-ink-200 mb-2">Desglose de Gastos</h4>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                          {vehicle.gastos.pintura > 0 && (
-                            <div className="bg-[#2b1d16] p-2 rounded">
-                              <p className="text-xs text-ink-200">Pintura</p>
-                              <p className="text-sm font-medium text-orange-600">
-                                {formatCurrency(vehicle.gastos.pintura)}
-                              </p>
-                            </div>
-                          )}
-                          {vehicle.gastos.mecanica > 0 && (
-                            <div className="bg-[#17212f] p-2 rounded">
-                              <p className="text-xs text-ink-200">Mecánica</p>
-
-                              <p className="text-sm font-medium text-blue-600">
-                                {formatCurrency(vehicle.gastos.mecanica)}
-                              </p>
-                            </div>
-                          )}
-                          {vehicle.gastos.traspaso > 0 && (
-                            <div className="bg-[#241828] p-2 rounded">
-                              <p className="text-xs text-ink-200">Traspaso</p>
-                              <p className="text-sm font-medium text-purple-600">
-                                {formatCurrency(vehicle.gastos.traspaso)}
-                              </p>
-                            </div>
-                          )}
-                          {vehicle.gastos.alistamiento > 0 && (
-                            <div className="bg-[#16251f] p-2 rounded">
-                              <p className="text-xs text-ink-200">Alistamiento</p>
-                              <p className="text-sm font-medium text-green-600">
-                                {formatCurrency(vehicle.gastos.alistamiento)}
-                              </p>
-                            </div>
-                          )}
-                          {vehicle.gastos.tapiceria > 0 && (
-                            <div className="bg-[#2b1823] p-2 rounded">
-                              <p className="text-xs text-ink-200">Tapicería</p>
-
-                              <p className="text-sm font-medium text-pink-600">
-                                {formatCurrency(vehicle.gastos.tapiceria)}
-                              </p>
-                            </div>
-                          )}
-                          {vehicle.gastos.transporte > 0 && (
-                            <div className="bg-[#14242b] p-2 rounded">
-                              <p className="text-xs text-ink-200">Transporte</p>
-                              <p className="text-sm font-medium text-cyan-600">
-                                {formatCurrency(vehicle.gastos.transporte)}
-                              </p>
-                            </div>
-                          )}
-                          {vehicle.gastos.varios > 0 && (
-                            <div className="bg-[#1a1d23] p-2 rounded">
-                              <p className="text-xs text-ink-200">Varios</p>
-                              <p className="text-sm font-medium text-ink-200">
-                                {formatCurrency(vehicle.gastos.varios)}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
 
                     {/* Documentación */}
 

@@ -246,6 +246,7 @@ const PROPERTY_CARD_EDITABLE_FIELDS: Array<{
 ];
 
 const VehicleForm: React.FC = () => {
+  const showVehicleExpensesSection = false;
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEditMode = Boolean(id);
@@ -1881,7 +1882,8 @@ const VehicleForm: React.FC = () => {
             </div>
           </div>
 
-          {/* Gastos */}
+          {/* Gastos del Vehículo ocultos para mostrar solo gastos de inversionistas */}
+          {showVehicleExpensesSection && (
           <div className="card">
             <h2 className="text-xl font-semibold mb-4 text-gray-900">Gastos del Vehículo</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -2129,6 +2131,7 @@ const VehicleForm: React.FC = () => {
               </div>
             </div>
           </div>
+          )}
 
           {/* Inversionistas */}
           <div className="card">
