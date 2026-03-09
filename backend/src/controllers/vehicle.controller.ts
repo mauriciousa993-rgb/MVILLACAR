@@ -13,6 +13,12 @@ const VEHICLE_TYPES = new Set(['suv', 'pickup', 'sedan', 'hatchback']);
 const SALE_READY_STATUS = 'listo_venta';
 const NEGOTIATION_STATUS = 'en_negociacion';
 const INVENTORY_STATUSES = ['en_proceso', SALE_READY_STATUS, NEGOTIATION_STATUS];
+type PublicTramiteStatus =
+  | 'firma_documentos'
+  | 'radicacion'
+  | 'recepcion_tarjeta'
+  | 'entrega_cliente'
+  | 'completado';
 
 const normalizeVehicleType = (value: any): 'suv' | 'pickup' | 'sedan' | 'hatchback' => {
   const parsed = typeof value === 'string' ? value.toLowerCase().trim() : '';
@@ -114,6 +120,16 @@ const createEmptySaleData = (): VehicleSaleData => ({
 
 const getTrimmedString = (value: unknown): string =>
   typeof value === 'string' ? value.trim() : '';
+
+const normalizeSignatureDataUrl = (value: unknown): string => {
+  if (typeof value !== 'string') return '';
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+  const isValidDataUrl = /^data:image\/(png|jpeg|jpg);base64,[A-Za-z0-9+/=]+$/.test(trimmed);
+  if (!isValidDataUrl) return '';
+  if (trimmed.length > 350000) return '';
+  return trimmed;
+};
 
 const getFirstString = (...values: unknown[]): string => {
   for (const value of values) {
@@ -369,6 +385,70 @@ const resolveVehicleDocumentInfo = (vehicle: IVehicleDocument, saleData: Vehicle
       ? getFirstString(vehicle.documentacion?.prenda?.detalles, 'Si, revisar detalle de prenda')
       : 'No registra',
   };
+};
+
+const resolvePublicTramiteStatus = (
+  estadoTramite: IVehicleDocument['estadoTramite'],
+  hasDeliverySignature: boolean
+): PublicTramiteStatus => {
+  if (estadoTramite === 'radicacion') return 'radicacion';
+  if (estadoTramite === 'recepcion_tarjeta' || estadoTramite === 'revision_documentos') {
+    return 'recepcion_tarjeta';
+  }
+  if (estadoTramite === 'entrega_cliente' || estadoTramite === 'aprobado') {
+    return hasDeliverySignature ? 'completado' : 'entrega_cliente';
+  }
+  if (estadoTramite === 'completado') return 'completado';
+  return 'firma_documentos';
+};
+
+const buildConsultaTramiteResponse = (vehicle: IVehicleDocument) => {
+  const firmaDataUrl = getTrimmedString(vehicle.firmaEntregaCliente?.firmaDataUrl);
+  const hasDeliverySignature = Boolean(firmaDataUrl);
+  const estadoTramite = resolvePublicTramiteStatus(vehicle.estadoTramite, hasDeliverySignature);
+
+  return {
+    found: true,
+    vehiculo: {
+      marca: vehicle.marca,
+      modelo: vehicle.modelo,
+      año: vehicle.año,
+      placa: vehicle.placa,
+      color: vehicle.color,
+      fechaVenta: vehicle.fechaVenta,
+      estadoTramite,
+      comprador: {
+        nombre: vehicle.datosVenta?.comprador?.nombre || 'No especificado',
+      },
+      firmaEntregaCliente: hasDeliverySignature
+        ? {
+            nombre: vehicle.firmaEntregaCliente?.nombre || 'No especificado',
+            firmaDataUrl,
+            fechaFirma: vehicle.firmaEntregaCliente?.fechaFirma,
+          }
+        : null,
+    },
+  };
+};
+
+const getSignatureImageFromDataUrl = (
+  dataUrl: unknown
+): { buffer: Buffer; imageType: 'PNG' | 'JPEG' } | null => {
+  const normalized = normalizeSignatureDataUrl(dataUrl);
+  if (!normalized) return null;
+  const match = normalized.match(/^data:image\/(png|jpeg|jpg);base64,([A-Za-z0-9+/=]+)$/);
+  if (!match) return null;
+  const imageType = match[1] === 'png' ? 'PNG' : 'JPEG';
+  const base64Data = match[2];
+  if (!base64Data) return null;
+
+  try {
+    const buffer = Buffer.from(base64Data, 'base64');
+    if (!buffer.length) return null;
+    return { buffer, imageType };
+  } catch {
+    return null;
+  }
 };
 
 // Crear nuevo vehículo
@@ -1360,9 +1440,34 @@ export const generateContract = async (req: AuthRequest, res: Response): Promise
 
     doc.fontSize(10).font('Helvetica-Bold')
        .text('COMPRADOR', 320, signatureY, { width: 220, align: 'center' });
+    const buyerSignature = getSignatureImageFromDataUrl(vehicle.firmaEntregaCliente?.firmaDataUrl);
+    if (buyerSignature) {
+      try {
+        doc.image(buyerSignature.buffer, 340, signatureY + 2, {
+          width: 180,
+          height: 24,
+        });
+      } catch (signatureError: any) {
+        console.warn('No se pudo renderizar la firma del comprador en el contrato:', signatureError?.message);
+      }
+    }
     doc.moveTo(320, signatureY + 30).lineTo(540, signatureY + 30).stroke();
     doc.fontSize(9).font('Helvetica')
        .text(`C.C. ${vehicle.datosVenta.comprador.identificacion}`, 320, signatureY + 35, { width: 220, align: 'center' });
+    if (vehicle.firmaEntregaCliente?.nombre || vehicle.firmaEntregaCliente?.fechaFirma) {
+      const signatureDateLabel = vehicle.firmaEntregaCliente?.fechaFirma
+        ? new Date(vehicle.firmaEntregaCliente.fechaFirma).toLocaleDateString('es-CO')
+        : 'N/A';
+      doc
+        .fontSize(8)
+        .font('Helvetica')
+        .text(
+          `Firma digital: ${vehicle.firmaEntregaCliente?.nombre || 'No especificado'} (${signatureDateLabel})`,
+          320,
+          signatureY + 48,
+          { width: 220, align: 'center' }
+        );
+    }
 
     doc.end();
 
@@ -1473,9 +1578,36 @@ export const generateTransferForm = async (req: AuthRequest, res: Response): Pro
        .text('Firma Vendedor', 40, signatureY + 15)
        .text(`C.C. ${vehicle.datosVenta.vendedor.identificacion}`, 40, signatureY + 30);
 
-    doc.text('_______________________', 300, signatureY)
-       .text('Firma Comprador', 300, signatureY + 15)
-       .text(`C.C. ${vehicle.datosVenta.comprador.identificacion}`, 300, signatureY + 30);
+    doc.text('_______________________', 300, signatureY);
+    const transferBuyerSignature = getSignatureImageFromDataUrl(vehicle.firmaEntregaCliente?.firmaDataUrl);
+    if (transferBuyerSignature) {
+      try {
+        doc.image(transferBuyerSignature.buffer, 300, signatureY + 2, {
+          width: 160,
+          height: 22,
+        });
+      } catch (signatureError: any) {
+        console.warn(
+          'No se pudo renderizar la firma del comprador en el formulario de traspaso:',
+          signatureError?.message
+        );
+      }
+    }
+    doc.text('Firma Comprador', 300, signatureY + 15).text(
+      `C.C. ${vehicle.datosVenta.comprador.identificacion}`,
+      300,
+      signatureY + 30
+    );
+    if (vehicle.firmaEntregaCliente?.nombre || vehicle.firmaEntregaCliente?.fechaFirma) {
+      const signatureDateLabel = vehicle.firmaEntregaCliente?.fechaFirma
+        ? new Date(vehicle.firmaEntregaCliente.fechaFirma).toLocaleDateString('es-CO')
+        : 'N/A';
+      doc.text(
+        `Firma digital: ${vehicle.firmaEntregaCliente?.nombre || 'No especificado'} (${signatureDateLabel})`,
+        300,
+        signatureY + 42
+      );
+    }
 
     doc.end();
 
@@ -1808,50 +1940,90 @@ export const getMonthlyReports = async (req: AuthRequest, res: Response): Promis
 };
 
 // Consulta pública del estado de trámite por placa (sin autenticación)
-export const consultarEstadoTramite = async (req: Request, res: Response): Promise<void> => {
+export const registrarFirmaEntregaTramite = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { placa } = req.params;
+    const placa = getTrimmedString(req.params.placa).toUpperCase();
+    const nombre = getTrimmedString(req.body?.nombre).slice(0, 120);
+    const firmaDataUrl = normalizeSignatureDataUrl(req.body?.firmaDataUrl);
 
     if (!placa) {
       res.status(400).json({ message: 'La placa es requerida' });
       return;
     }
 
-    const vehicle = await Vehicle.findOne({ 
-      placa: placa.toUpperCase(),
-      estado: 'vendido'
-    }).select('marca modelo año placa color estado estadoTramite fechaVenta datosVenta');
+    if (!nombre) {
+      res.status(400).json({ message: 'El nombre de quien recibe es obligatorio' });
+      return;
+    }
+
+    if (!firmaDataUrl) {
+      res.status(400).json({ message: 'La firma digital es obligatoria y debe ser una imagen valida' });
+      return;
+    }
+
+    const vehicle = await Vehicle.findOne({
+      placa,
+      estado: 'vendido',
+    }).select('marca modelo año placa color estadoTramite fechaVenta datosVenta firmaEntregaCliente');
 
     if (!vehicle) {
-      res.status(404).json({ 
-        message: 'No se encontró un vehículo vendido con esta placa',
-        found: false
+      res.status(404).json({
+        message: 'No se encontro un vehiculo vendido con esta placa',
+        found: false,
       });
       return;
     }
 
-    const response = {
-      found: true,
-      vehiculo: {
-        marca: vehicle.marca,
-        modelo: vehicle.modelo,
-        año: vehicle.año,
-        placa: vehicle.placa,
-        color: vehicle.color,
-        fechaVenta: vehicle.fechaVenta,
-        estadoTramite: vehicle.estadoTramite || 'firma_documentos',
-        comprador: {
-          nombre: vehicle.datosVenta?.comprador?.nombre || 'No especificado'
-        }
-      }
+    vehicle.firmaEntregaCliente = {
+      nombre,
+      firmaDataUrl,
+      fechaFirma: new Date(),
     };
+    vehicle.estadoTramite = 'completado';
+    await vehicle.save();
 
-    res.json(response);
+    res.json({
+      message: 'Firma registrada correctamente',
+      ...buildConsultaTramiteResponse(vehicle),
+    });
   } catch (error: any) {
-    console.error('Error al consultar estado de trámite:', error);
-    res.status(500).json({ 
-      message: 'Error al consultar estado de trámite', 
-      error: error.message 
+    console.error('Error al registrar firma de entrega:', error);
+    res.status(500).json({
+      message: 'Error al registrar firma de entrega',
+      error: error.message,
+    });
+  }
+};
+
+// Consulta publica del estado de tramite por placa (sin autenticacion)
+export const consultarEstadoTramite = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const placa = getTrimmedString(req.params.placa).toUpperCase();
+
+    if (!placa) {
+      res.status(400).json({ message: 'La placa es requerida' });
+      return;
+    }
+
+    const vehicle = await Vehicle.findOne({
+      placa,
+      estado: 'vendido',
+    }).select('marca modelo año placa color estado estadoTramite fechaVenta datosVenta firmaEntregaCliente');
+
+    if (!vehicle) {
+      res.status(404).json({
+        message: 'No se encontro un vehiculo vendido con esta placa',
+        found: false,
+      });
+      return;
+    }
+
+    res.json(buildConsultaTramiteResponse(vehicle));
+  } catch (error: any) {
+    console.error('Error al consultar estado de tramite:', error);
+    res.status(500).json({
+      message: 'Error al consultar estado de tramite',
+      error: error.message,
     });
   }
 };

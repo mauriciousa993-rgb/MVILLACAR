@@ -90,6 +90,12 @@ export interface IDatosTarjetaPropiedad {
   identificacionPropietario: string;
 }
 
+export interface IFirmaEntregaCliente {
+  nombre: string;
+  firmaDataUrl: string;
+  fechaFirma?: Date;
+}
+
 export interface IGastoDetalle {
   descripcion: string;
   encargado: string;
@@ -133,7 +139,16 @@ export interface IVehicleDocument extends Document {
   inversionistas: IInversionista[];
   tieneInversionistas: boolean;
   estado: 'en_proceso' | 'listo_venta' | 'en_negociacion' | 'separado' | 'vendido' | 'retirado';
-  estadoTramite?: 'firma_documentos' | 'radicacion' | 'revision_documentos' | 'aprobado' | 'rechazado';
+  estadoTramite?:
+    | 'firma_documentos'
+    | 'radicacion'
+    | 'recepcion_tarjeta'
+    | 'entrega_cliente'
+    | 'completado'
+    | 'revision_documentos'
+    | 'aprobado'
+    | 'rechazado';
+  firmaEntregaCliente?: IFirmaEntregaCliente;
   datosTarjetaPropiedad?: IDatosTarjetaPropiedad;
   datosVenta?: IDatosVenta;
   datosSeparacion?: IDatosSeparacion;
@@ -251,7 +266,21 @@ const vehicleSchema = new Schema<IVehicleDocument>({
   },
   estadoTramite: {
     type: String,
-    enum: ['firma_documentos', 'radicacion', 'revision_documentos', 'aprobado', 'rechazado'],
+    enum: [
+      'firma_documentos',
+      'radicacion',
+      'recepcion_tarjeta',
+      'entrega_cliente',
+      'completado',
+      'revision_documentos',
+      'aprobado',
+      'rechazado',
+    ],
+  },
+  firmaEntregaCliente: {
+    nombre: { type: String, default: '', trim: true },
+    firmaDataUrl: { type: String, default: '', trim: true },
+    fechaFirma: { type: Date },
   },
   datosTarjetaPropiedad: {
     linea: { type: String, default: '' },

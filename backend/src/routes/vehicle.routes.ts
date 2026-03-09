@@ -20,6 +20,7 @@ import {
   generateTransferForm,
   getVehiclePhoto,
   consultarEstadoTramite,
+  registrarFirmaEntregaTramite,
 } from '../controllers/vehicle.controller';
 import { ocrPropertyCardWithVisionAI } from '../controllers/propertyCardOcr.controller';
 import {
@@ -43,6 +44,7 @@ const ocrUpload = multer({
 router.get('/marketplace', getMarketplaceVehicles);
 router.get('/photo/:filename', getVehiclePhoto);
 router.get('/consulta/:placa', consultarEstadoTramite);
+router.post('/consulta/:placa/firma-entrega', registrarFirmaEntregaTramite);
 
 // Todas las rutas requieren autenticación
 router.use(authenticate);
