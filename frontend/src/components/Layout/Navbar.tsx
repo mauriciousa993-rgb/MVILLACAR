@@ -71,32 +71,26 @@ const Navbar: React.FC = () => {
   };
 
   const navLinkClass =
-    'text-ink-100 hover:text-white hover:bg-[#23252a] transition-colors rounded-lg px-3 py-2';
+    'text-ink-100 hover:text-white hover:bg-[#12264b] transition-colors rounded-lg px-3 py-2';
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-[#2f3238] bg-[#121212]/95 text-white backdrop-blur-md shadow-[0_18px_40px_-30px_rgba(0,0,0,0.9)]">
+    <nav className="sticky top-0 z-40 border-b border-[#274376] bg-[#08142c]/95 text-white backdrop-blur-md shadow-[0_18px_40px_-30px_rgba(0,0,0,0.9)]">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
           <Link to="/" className="flex items-center space-x-3 min-w-0">
-            <img src={autoTechLogo} alt="AutoTech logo" className="h-11 w-11 flex-shrink-0 object-contain" />
+            <img src={autoTechLogo} alt="Villacar logo" className="h-11 w-11 flex-shrink-0 object-contain" />
             <div className="min-w-0">
-              <span className="hidden sm:block text-xl leading-none font-bold tracking-wide truncate">
-                <span className="text-white">Auto</span>
-                <span className="text-primary-400">Tech</span>
-              </span>
-              <span className="sm:hidden text-base leading-none font-bold truncate">
-                <span className="text-white">Auto</span>
-                <span className="text-primary-400">Tech</span>
-              </span>
+              <span className="hidden sm:block text-xl leading-none font-bold tracking-wide truncate text-white">Villacar</span>
+              <span className="sm:hidden text-base leading-none font-bold truncate text-white">Villacar</span>
               <span className="hidden sm:block text-xs text-ink-300 mt-1">
-                Gestion de vehiculos
+                Gestion de vehiculos - Desarrollado por Auto Tech
               </span>
             </div>
           </Link>
 
           <div className="flex items-center gap-4">
             {/* Usuario y logout siempre visibles en pantallas grandes */}
-            <div className="hidden lg:flex items-center space-x-4 border-l border-[#343840] pl-4">
+            <div className="hidden lg:flex items-center space-x-4 border-l border-[#274376] pl-4">
               <div className="flex items-center space-x-2">
                 <User className="h-5 w-5 text-primary-400" />
                 <div className="text-sm">
@@ -115,10 +109,10 @@ const Navbar: React.FC = () => {
             </div>
 
             {/* Menu hamburguesa siempre visible */}
-            <button
-              type="button"
-              onClick={toggleMobileMenu}
-              className="inline-flex items-center gap-2 p-2 bg-[#1f2126] hover:bg-[#292c32] rounded-lg transition-colors flex-shrink-0 border border-[#343840]"
+              <button
+                type="button"
+                onClick={toggleMobileMenu}
+              className="inline-flex items-center gap-2 p-2 bg-[#0f2347] hover:bg-[#163161] rounded-lg transition-colors flex-shrink-0 border border-[#274376]"
               aria-label="Toggle menu"
               aria-expanded={isMobileMenuOpen}
             >
@@ -129,26 +123,26 @@ const Navbar: React.FC = () => {
         </div>
 
         {isMobileMenuOpen && (
-          <div className="border-t border-[#343840] py-4">
+          <div className="border-t border-[#274376] py-4">
             <div className="flex flex-col space-y-4">
               <Link
                 to="/"
                 onClick={closeMobileMenu}
-                className="text-ink-100 hover:text-white transition-colors py-2 px-4 hover:bg-[#23252a] rounded-lg"
+                className="text-ink-100 hover:text-white transition-colors py-2 px-4 hover:bg-[#12264b] rounded-lg"
               >
                 Dashboard
               </Link>
               <Link
                 to="/vehicles"
                 onClick={closeMobileMenu}
-                className="text-ink-100 hover:text-white transition-colors py-2 px-4 hover:bg-[#23252a] rounded-lg"
+                className="text-ink-100 hover:text-white transition-colors py-2 px-4 hover:bg-[#12264b] rounded-lg"
               >
                 Vehiculos
               </Link>
               <Link
                 to="/notifications"
                 onClick={closeMobileMenu}
-                className="text-ink-100 hover:text-white transition-colors py-2 px-4 hover:bg-[#23252a] rounded-lg flex items-center space-x-2 relative"
+                className="text-ink-100 hover:text-white transition-colors py-2 px-4 hover:bg-[#12264b] rounded-lg flex items-center space-x-2 relative"
               >
                 <Bell className="h-4 w-4 text-primary-400" />
                 <span>Notificaciones</span>
@@ -161,7 +155,7 @@ const Navbar: React.FC = () => {
               <Link
                 to="/marketplace"
                 onClick={closeMobileMenu}
-                className="text-ink-100 hover:text-white transition-colors py-2 px-4 hover:bg-[#23252a] rounded-lg flex items-center space-x-2"
+                className="text-ink-100 hover:text-white transition-colors py-2 px-4 hover:bg-[#12264b] rounded-lg flex items-center space-x-2"
               >
                 <Store className="h-4 w-4 text-primary-400" />
                 <span>Marketplace</span>
@@ -169,7 +163,7 @@ const Navbar: React.FC = () => {
               <Link
                 to="/consulta-tramite"
                 onClick={closeMobileMenu}
-                className="text-ink-100 hover:text-white transition-colors py-2 px-4 hover:bg-[#23252a] rounded-lg flex items-center space-x-2"
+                className="text-ink-100 hover:text-white transition-colors py-2 px-4 hover:bg-[#12264b] rounded-lg flex items-center space-x-2"
               >
                 <Search className="h-4 w-4 text-primary-400" />
                 <span>Consulta Trámite</span>
@@ -177,7 +171,7 @@ const Navbar: React.FC = () => {
               <Link
                 to="/reports"
                 onClick={closeMobileMenu}
-                className="text-ink-100 hover:text-white transition-colors py-2 px-4 hover:bg-[#23252a] rounded-lg flex items-center space-x-2"
+                className="text-ink-100 hover:text-white transition-colors py-2 px-4 hover:bg-[#12264b] rounded-lg flex items-center space-x-2"
               >
                 <BarChart3 className="h-4 w-4 text-primary-400" />
                 <span>Reportes</span>
@@ -186,7 +180,7 @@ const Navbar: React.FC = () => {
                 <Link
                   to="/vehicles/inspection"
                   onClick={closeMobileMenu}
-                  className="text-ink-100 hover:text-white transition-colors py-2 px-4 hover:bg-[#23252a] rounded-lg flex items-center space-x-2"
+                  className="text-ink-100 hover:text-white transition-colors py-2 px-4 hover:bg-[#12264b] rounded-lg flex items-center space-x-2"
                 >
                   <ClipboardCheck className="h-4 w-4 text-primary-400" />
                   <span>Checklist</span>
@@ -195,7 +189,7 @@ const Navbar: React.FC = () => {
               <Link
                 to="/fixed-expenses"
                 onClick={closeMobileMenu}
-                className="text-ink-100 hover:text-white transition-colors py-2 px-4 hover:bg-[#23252a] rounded-lg flex items-center space-x-2"
+                className="text-ink-100 hover:text-white transition-colors py-2 px-4 hover:bg-[#12264b] rounded-lg flex items-center space-x-2"
               >
                 <Receipt className="h-4 w-4 text-primary-400" />
                 <span>Gastos Fijos</span>
@@ -203,7 +197,7 @@ const Navbar: React.FC = () => {
               <Link
                 to="/commissions"
                 onClick={closeMobileMenu}
-                className="text-ink-100 hover:text-white transition-colors py-2 px-4 hover:bg-[#23252a] rounded-lg flex items-center space-x-2"
+                className="text-ink-100 hover:text-white transition-colors py-2 px-4 hover:bg-[#12264b] rounded-lg flex items-center space-x-2"
               >
                 <DollarSign className="h-4 w-4 text-primary-400" />
                 <span>Comisiones</span>
@@ -212,13 +206,13 @@ const Navbar: React.FC = () => {
                 <Link
                   to="/users"
                   onClick={closeMobileMenu}
-                  className="text-ink-100 hover:text-white transition-colors py-2 px-4 hover:bg-[#23252a] rounded-lg"
+                  className="text-ink-100 hover:text-white transition-colors py-2 px-4 hover:bg-[#12264b] rounded-lg"
                 >
                   Usuarios
                 </Link>
               )}
 
-              <div className="border-t border-[#343840] pt-4 mt-2">
+              <div className="border-t border-[#274376] pt-4 mt-2">
                 <div className="flex items-center space-x-2 px-4 py-2">
                   <User className="h-5 w-5 text-primary-400" />
                   <div className="text-sm">
@@ -233,7 +227,7 @@ const Navbar: React.FC = () => {
                     closeMobileMenu();
                     handleLogout();
                   }}
-                  className="w-full flex items-center space-x-2 text-ink-100 hover:text-primary-300 transition-colors py-2 px-4 hover:bg-[#23252a] rounded-lg text-left"
+                  className="w-full flex items-center space-x-2 text-ink-100 hover:text-primary-300 transition-colors py-2 px-4 hover:bg-[#12264b] rounded-lg text-left"
                 >
                   <LogOut className="h-5 w-5" />
                   <span>Cerrar sesion</span>
@@ -248,3 +242,4 @@ const Navbar: React.FC = () => {
 };
 
 export default Navbar;
+
