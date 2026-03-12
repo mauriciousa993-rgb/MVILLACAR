@@ -27,6 +27,31 @@ import {
 } from '../utils/propertyCardImageEditor';
 
 const DEFAULT_VEHICLE_YEAR = new Date().getFullYear();
+const SUPPORTED_VEHICLE_TYPES = [
+  'sedan',
+  'suv',
+  'pickup',
+  'hatchback',
+  'motocicleta',
+  'motocarro',
+] as const;
+
+type SupportedVehicleType = (typeof SUPPORTED_VEHICLE_TYPES)[number];
+
+const parseVehicleTypeValue = (value: unknown): SupportedVehicleType | null => {
+  const normalized =
+    typeof value === 'string' ? value.toLowerCase().trim().replace(/[\s-]+/g, '_') : '';
+
+  if (normalized === 'moto') return 'motocicleta';
+  if (normalized === 'moto_carro') return 'motocarro';
+
+  return (SUPPORTED_VEHICLE_TYPES as readonly string[]).includes(normalized)
+    ? (normalized as SupportedVehicleType)
+    : null;
+};
+
+const normalizeVehicleTypeValue = (value: unknown): SupportedVehicleType =>
+  parseVehicleTypeValue(value) || 'sedan';
 
 type PropertyCardApplyMode = 'overwrite' | 'fill-empty';
 
@@ -135,11 +160,7 @@ const normalizePropertyCardDraft = (
 const mapVisionAiExtractedToDraft = (
   extracted: Record<string, unknown> | undefined
 ): Partial<VehicleCardExtractedData> => {
-  const rawType = typeof extracted?.tipoVehiculo === 'string' ? extracted.tipoVehiculo.toLowerCase() : '';
-  const tipoVehiculo =
-    rawType === 'suv' || rawType === 'pickup' || rawType === 'sedan' || rawType === 'hatchback'
-      ? (rawType as VehicleCardExtractedData['tipoVehiculo'])
-      : null;
+  const tipoVehiculo = parseVehicleTypeValue(extracted?.tipoVehiculo);
   const anioCandidate =
     typeof extracted?.anio === 'number'
       ? extracted.anio
@@ -222,6 +243,8 @@ const VEHICLE_TYPE_OPTIONS = [
   { value: 'suv', label: 'SUV' },
   { value: 'pickup', label: 'Pickup' },
   { value: 'hatchback', label: 'Hatchback' },
+  { value: 'motocicleta', label: 'Motocicleta' },
+  { value: 'motocarro', label: 'Motocarro' },
 ] as const;
 
 const PROPERTY_CARD_EDITABLE_FIELDS: Array<{
@@ -260,7 +283,7 @@ const VehicleForm: React.FC = () => {
     // Datos básicos
     marca: '',
     modelo: '',
-    tipoVehiculo: 'sedan' as 'suv' | 'pickup' | 'sedan' | 'hatchback',
+    tipoVehiculo: 'sedan' as SupportedVehicleType,
     año: new Date().getFullYear(),
 
     placa: '',
@@ -608,10 +631,7 @@ const VehicleForm: React.FC = () => {
         }
       }));
     } else if (name === 'tipoVehiculo') {
-      const normalizedType =
-        value === 'suv' || value === 'pickup' || value === 'hatchback' || value === 'sedan'
-          ? value
-          : 'sedan';
+      const normalizedType = normalizeVehicleTypeValue(value);
       setFormData(prev => ({
         ...prev,
         tipoVehiculo: normalizedType
@@ -1003,10 +1023,7 @@ const VehicleForm: React.FC = () => {
   const updatePropertyCardDraftVehicleType = (value: string) => {
     setPropertyCardDraft((prev) => ({
       ...prev,
-      tipoVehiculo:
-        value === 'sedan' || value === 'suv' || value === 'pickup' || value === 'hatchback'
-          ? value
-          : null,
+      tipoVehiculo: parseVehicleTypeValue(value),
     }));
   };
 
@@ -1180,12 +1197,7 @@ const VehicleForm: React.FC = () => {
         placa: normalizePlateValue(formData.placa),
         vin: vinUnificado,
         color: formData.color.trim(),
-        tipoVehiculo:
-          formData.tipoVehiculo === 'suv' ||
-          formData.tipoVehiculo === 'pickup' ||
-          formData.tipoVehiculo === 'hatchback'
-            ? formData.tipoVehiculo
-            : 'sedan',
+        tipoVehiculo: normalizeVehicleTypeValue(formData.tipoVehiculo),
         estadoTramite:
           formData.estado === 'vendido' && formData.estadoTramite
             ? formData.estadoTramite
@@ -2638,6 +2650,7 @@ const VehicleForm: React.FC = () => {
                       <option value="radicacion">Radicación</option>
                       <option value="recepcion_tarjeta">Recepción de Tarjeta de Propiedad</option>
                       <option value="entrega_cliente">Entrega de Tarjeta al Cliente</option>
+                      <option value="completado">Trámite Completado</option>
                     </select>
                     <p className="mt-2 text-xs text-green-600">
                       Seguimiento del proceso de traspaso del vehículo

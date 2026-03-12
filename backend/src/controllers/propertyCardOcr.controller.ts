@@ -20,7 +20,7 @@ type VisionExtractedPayload = {
   propietario?: string;
   identificacionPropietario?: string;
   prenda?: string;
-  tipoVehiculo?: 'suv' | 'pickup' | 'sedan' | 'hatchback' | '' | null;
+  tipoVehiculo?: 'suv' | 'pickup' | 'sedan' | 'hatchback' | 'motocicleta' | 'motocarro' | '' | null;
   rawText?: string;
   confidence?: number;
 };
@@ -38,7 +38,14 @@ type UploadedImageFile = {
   buffer: Buffer;
 };
 
-const VEHICLE_TYPE_SET = new Set(['suv', 'pickup', 'sedan', 'hatchback']);
+const VEHICLE_TYPE_SET = new Set([
+  'suv',
+  'pickup',
+  'sedan',
+  'hatchback',
+  'motocicleta',
+  'motocarro',
+]);
 const OPENAI_VISION_MODEL = process.env.OPENAI_VISION_MODEL || 'gpt-4o-mini';
 const OPENAI_API_BASE_URL = process.env.OPENAI_API_BASE_URL || 'https://api.openai.com/v1';
 
@@ -80,7 +87,12 @@ const normalizeYear = (value: unknown) => {
 };
 
 const normalizeVehicleType = (value: unknown) => {
-  const normalized = typeof value === 'string' ? value.trim().toLowerCase() : '';
+  const normalized =
+    typeof value === 'string' ? value.trim().toLowerCase().replace(/[\s-]+/g, '_') : '';
+
+  if (normalized === 'moto') return 'motocicleta';
+  if (normalized === 'moto_carro') return 'motocarro';
+
   return VEHICLE_TYPE_SET.has(normalized) ? normalized : null;
 };
 
@@ -173,7 +185,7 @@ export const ocrPropertyCardWithVisionAI = async (
       '  "propietario": string,',
       '  "identificacionPropietario": string,',
       '  "prenda": string,',
-      '  "tipoVehiculo": "suv"|"pickup"|"sedan"|"hatchback"|null,',
+      '  "tipoVehiculo": "suv"|"pickup"|"sedan"|"hatchback"|"motocicleta"|"motocarro"|null,',
       '  "confidence": number,',
       '  "rawText": string',
       '}',

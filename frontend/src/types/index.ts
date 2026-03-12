@@ -196,11 +196,19 @@ export interface VehicleInspectionChecklistPayload {
   generalObservations: string;
 }
 
+export type VehicleType =
+  | 'suv'
+  | 'pickup'
+  | 'sedan'
+  | 'hatchback'
+  | 'motocicleta'
+  | 'motocarro';
+
 export interface Vehicle {
   _id: string;
   marca: string;
   modelo: string;
-  tipoVehiculo: 'suv' | 'pickup' | 'sedan' | 'hatchback';
+  tipoVehiculo: VehicleType;
   año: number;
   placa: string;
   vin: string;
@@ -317,7 +325,7 @@ export interface Statistics {
 export interface VehicleFormData {
   marca: string;
   modelo: string;
-  tipoVehiculo: 'suv' | 'pickup' | 'sedan' | 'hatchback';
+  tipoVehiculo: VehicleType;
   año: number;
   placa: string;
   vin: string;

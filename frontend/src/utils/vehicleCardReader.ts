@@ -1,4 +1,10 @@
-export type ExtractedVehicleType = 'suv' | 'pickup' | 'sedan' | 'hatchback';
+export type ExtractedVehicleType =
+  | 'suv'
+  | 'pickup'
+  | 'sedan'
+  | 'hatchback'
+  | 'motocicleta'
+  | 'motocarro';
 
 export interface VehicleCardExtractedData {
   placa: string;
@@ -886,6 +892,15 @@ const normalizeOwner = (value: string): string => {
 };
 
 const inferVehicleType = (text: string): ExtractedVehicleType | null => {
+  if (
+    text.includes('MOTOCARRO') ||
+    text.includes('MOTO CARRO') ||
+    text.includes('MOTOTRICICLO') ||
+    text.includes('TRICIMOTO')
+  ) {
+    return 'motocarro';
+  }
+  if (text.includes('MOTOCICLETA') || /\bMOTO\b/.test(text)) return 'motocicleta';
   if (text.includes('PICK UP') || text.includes('PICKUP')) return 'pickup';
   if (text.includes('HATCHBACK') || text.includes('HB')) return 'hatchback';
   if (text.includes('SUV') || text.includes('CAMPERO') || text.includes('CAMIONETA')) return 'suv';

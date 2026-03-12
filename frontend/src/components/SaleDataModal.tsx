@@ -38,7 +38,31 @@ const normalizeTipoServicio = (value?: string) => {
   return normalized;
 };
 
-const createBaseSaleData = (sellerName: string): DatosVenta => ({
+const normalizeVehicleTypeLabel = (vehicleType?: Vehicle['tipoVehiculo'] | null) => {
+  switch (vehicleType) {
+    case 'motocicleta':
+      return 'MOTOCICLETA';
+    case 'motocarro':
+      return 'MOTOCARRO';
+    case 'pickup':
+      return 'PICKUP';
+    case 'suv':
+      return 'SUV';
+    case 'hatchback':
+      return 'HATCHBACK';
+    case 'sedan':
+    default:
+      return 'SEDAN';
+  }
+};
+
+const getDefaultDoorCount = (vehicleType?: Vehicle['tipoVehiculo'] | null) =>
+  vehicleType === 'motocicleta' || vehicleType === 'motocarro' ? 0 : 4;
+
+const createBaseSaleData = (
+  sellerName: string,
+  vehicleType?: Vehicle['tipoVehiculo'] | null
+): DatosVenta => ({
   vendedor: {
     nombre: sellerName,
     identificacion: '',
@@ -57,7 +81,7 @@ const createBaseSaleData = (sellerName: string): DatosVenta => ({
     capacidad: '',
     cilindrada: '',
     claseVehiculo: '',
-    numeroPuertas: 4,
+    numeroPuertas: getDefaultDoorCount(vehicleType),
     numeroMotor: '',
     numeroChasis: '',
     linea: '',
@@ -115,19 +139,26 @@ const buildSaleFormData = (
   vehicleData?: Vehicle | null,
   initialData?: DatosVenta
 ): DatosVenta => {
-  const baseData = createBaseSaleData(sellerName);
+  const baseData = createBaseSaleData(sellerName, vehicleData?.tipoVehiculo);
   const cardData = vehicleData?.datosTarjetaPropiedad;
+  const ownerName = (cardData?.propietario || '').trim();
+  const ownerId = (cardData?.identificacionPropietario || '').trim();
+  const fallbackVehicleType = normalizeVehicleTypeLabel(vehicleData?.tipoVehiculo);
 
   const cardDefaults: PartialSaleData = {
+    vendedor: {
+      nombre: ownerName || sellerName,
+      identificacion: ownerId || '',
+    },
     vehiculoAdicional: {
-      tipoCarroceria: cardData?.tipoCarroceria || '',
+      tipoCarroceria: cardData?.tipoCarroceria || fallbackVehicleType,
       capacidad: cardData?.capacidad || '',
       cilindrada: cardData?.cilindrada || '',
-      claseVehiculo: cardData?.claseVehiculo || '',
-      numeroPuertas: baseData.vehiculoAdicional.numeroPuertas,
+      claseVehiculo: cardData?.claseVehiculo || fallbackVehicleType,
+      numeroPuertas: getDefaultDoorCount(vehicleData?.tipoVehiculo),
       numeroMotor: cardData?.numeroMotor || '',
       numeroChasis: cardData?.numeroChasis || vehicleData?.vin || '',
-      linea: cardData?.linea || '',
+      linea: cardData?.linea || vehicleData?.modelo || '',
       actaManifiesto: '',
       sitioMatricula: '',
       tipoServicio: normalizeTipoServicio(cardData?.servicio),
@@ -152,6 +183,7 @@ const SaleDataModal: React.FC<SaleDataModalProps> = ({
 }) => {
   const { user } = useAuth();
   const sellerName = user?.nombre || user?.email || '';
+  const defaultDoorCount = getDefaultDoorCount(vehicleData?.tipoVehiculo);
   const [formData, setFormData] = useState<DatosVenta>(() =>
     buildSaleFormData(sellerName, vehicleData, initialData)
   );
@@ -171,7 +203,7 @@ const SaleDataModal: React.FC<SaleDataModalProps> = ({
         tipoServicio: normalizeTipoServicio(formData.vehiculoAdicional.tipoServicio),
         numeroPuertas: Number.isFinite(formData.vehiculoAdicional.numeroPuertas)
           ? formData.vehiculoAdicional.numeroPuertas
-          : 4,
+          : defaultDoorCount,
       },
       transaccion: {
         ...formData.transaccion,
@@ -240,6 +272,9 @@ const SaleDataModal: React.FC<SaleDataModalProps> = ({
                 Se precargaron datos de tarjeta de propiedad para evitar diligenciarlos de nuevo.
               </p>
             )}
+            <p className="text-xs text-amber-700 mt-2">
+              Puedes dejar campos pendientes para generar documentos en modo traspaso abierto.
+            </p>
           </div>
           <button
             onClick={onClose}
@@ -261,7 +296,6 @@ const SaleDataModal: React.FC<SaleDataModalProps> = ({
                 </label>
                 <input
                   type="text"
-                  required
                   value={formData.vendedor.nombre}
                   onChange={(e) => updateVendedor('nombre', e.target.value)}
                   className="input"
@@ -274,7 +308,6 @@ const SaleDataModal: React.FC<SaleDataModalProps> = ({
                 </label>
                 <input
                   type="text"
-                  required
                   value={formData.vendedor.identificacion}
                   onChange={(e) => updateVendedor('identificacion', e.target.value)}
                   className="input"
@@ -287,7 +320,6 @@ const SaleDataModal: React.FC<SaleDataModalProps> = ({
                 </label>
                 <input
                   type="text"
-                  required
                   value={formData.vendedor.direccion}
                   onChange={(e) => updateVendedor('direccion', e.target.value)}
                   className="input"
@@ -300,7 +332,6 @@ const SaleDataModal: React.FC<SaleDataModalProps> = ({
                 </label>
                 <input
                   type="tel"
-                  required
                   value={formData.vendedor.telefono}
                   onChange={(e) => updateVendedor('telefono', e.target.value)}
                   className="input"
@@ -380,7 +411,6 @@ const SaleDataModal: React.FC<SaleDataModalProps> = ({
                 </label>
                 <input
                   type="text"
-                  required
                   value={formData.comprador.nombre}
                   onChange={(e) => updateComprador('nombre', e.target.value)}
                   className="input"
@@ -393,7 +423,6 @@ const SaleDataModal: React.FC<SaleDataModalProps> = ({
                 </label>
                 <input
                   type="text"
-                  required
                   value={formData.comprador.identificacion}
                   onChange={(e) => updateComprador('identificacion', e.target.value)}
                   className="input"
@@ -406,7 +435,6 @@ const SaleDataModal: React.FC<SaleDataModalProps> = ({
                 </label>
                 <input
                   type="text"
-                  required
                   value={formData.comprador.direccion}
                   onChange={(e) => updateComprador('direccion', e.target.value)}
                   className="input"
@@ -419,7 +447,6 @@ const SaleDataModal: React.FC<SaleDataModalProps> = ({
                 </label>
                 <input
                   type="tel"
-                  required
                   value={formData.comprador.telefono}
                   onChange={(e) => updateComprador('telefono', e.target.value)}
                   className="input"
@@ -432,7 +459,6 @@ const SaleDataModal: React.FC<SaleDataModalProps> = ({
                 </label>
                 <input
                   type="email"
-                  required
                   value={formData.comprador.email}
                   onChange={(e) => updateComprador('email', e.target.value)}
                   className="input"
@@ -504,10 +530,13 @@ const SaleDataModal: React.FC<SaleDataModalProps> = ({
                   value={formData.vehiculoAdicional.numeroPuertas}
                   onChange={(e) => {
                     const value = Number(e.target.value);
-                    updateVehiculoAdicional('numeroPuertas', Number.isFinite(value) ? value : 4);
+                    updateVehiculoAdicional(
+                      'numeroPuertas',
+                      Number.isFinite(value) ? value : defaultDoorCount
+                    );
                   }}
                   className="input"
-                  min="2"
+                  min="0"
                   max="6"
                 />
               </div>
@@ -600,7 +629,6 @@ const SaleDataModal: React.FC<SaleDataModalProps> = ({
                 </label>
                 <input
                   type="text"
-                  required
                   value={formData.transaccion.lugarCelebracion}
                   onChange={(e) => updateTransaccion('lugarCelebracion', e.target.value)}
                   className="input"
@@ -613,7 +641,6 @@ const SaleDataModal: React.FC<SaleDataModalProps> = ({
                 </label>
                 <input
                   type="date"
-                  required
                   value={formData.transaccion.fechaCelebracion}
                   onChange={(e) => updateTransaccion('fechaCelebracion', e.target.value)}
                   className="input"
@@ -625,7 +652,6 @@ const SaleDataModal: React.FC<SaleDataModalProps> = ({
                 </label>
                 <input
                   type="text"
-                  required
                   value={formData.transaccion.precioLetras}
                   onChange={(e) => updateTransaccion('precioLetras', e.target.value)}
                   className="input"
@@ -637,7 +663,6 @@ const SaleDataModal: React.FC<SaleDataModalProps> = ({
                   Forma de Pago *
                 </label>
                 <textarea
-                  required
                   value={formData.transaccion.formaPago}
                   onChange={(e) => updateTransaccion('formaPago', e.target.value)}
                   className="input"
@@ -675,7 +700,6 @@ const SaleDataModal: React.FC<SaleDataModalProps> = ({
                 </label>
                 <input
                   type="number"
-                  required
                   value={formData.transaccion.diasTraspaso}
                   onChange={(e) => {
                     const value = Number(e.target.value);
@@ -692,7 +716,6 @@ const SaleDataModal: React.FC<SaleDataModalProps> = ({
                 </label>
                 <input
                   type="date"
-                  required
                   value={formData.transaccion.fechaEntrega}
                   onChange={(e) => updateTransaccion('fechaEntrega', e.target.value)}
                   className="input"
@@ -715,7 +738,6 @@ const SaleDataModal: React.FC<SaleDataModalProps> = ({
                 </label>
                 <input
                   type="text"
-                  required
                   value={formData.transaccion.domicilioContractual}
                   onChange={(e) => updateTransaccion('domicilioContractual', e.target.value)}
                   className="input"

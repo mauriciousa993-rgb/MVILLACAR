@@ -3,9 +3,9 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { VehicleDamageZone, VehicleDamageZoneMarkerPosition } from '../types';
+import { VehicleDamageZone, VehicleDamageZoneMarkerPosition, VehicleType } from '../types';
 
-type VehicleModelType = 'suv' | 'pickup' | 'sedan' | 'hatchback';
+type VehicleModelType = VehicleType;
 
 const DEFAULT_MODEL_FALLBACKS = ['/models/ren-car-v3.fbx', '/models/ren%20carV3.fbx'];
 const GLTF_URL_PATTERN = /\.gltf(\?|#|$)|\.glb(\?|#|$)/i;
@@ -16,6 +16,8 @@ const MODEL_URL_CANDIDATES: Record<VehicleModelType, string[]> = {
   pickup: ['/models/pickup/scene.gltf', '/models/pickup.gltf', '/models/pickup.glb', '/models/pickup.fbx', '/models/Pickup.fbx', '/models/pickup-model.fbx', ...DEFAULT_MODEL_FALLBACKS],
   sedan: ['/models/sedan/scene.gltf', '/models/sedan.gltf', '/models/sedan.glb', '/models/sedan.fbx', '/models/sedan-model.fbx', ...DEFAULT_MODEL_FALLBACKS],
   hatchback: ['/models/hatchback/scene.gltf', '/models/hatchback.gltf', '/models/hatchback.glb', '/models/hatchback.fbx', '/models/hatchback-model.fbx', ...DEFAULT_MODEL_FALLBACKS],
+  motocicleta: ['/models/motocicleta/scene.gltf', '/models/moto/scene.gltf', '/models/moto.gltf', '/models/moto.glb', '/models/moto.fbx', ...DEFAULT_MODEL_FALLBACKS],
+  motocarro: ['/models/motocarro/scene.gltf', '/models/motocarro.gltf', '/models/motocarro.glb', '/models/motocarro.fbx', ...DEFAULT_MODEL_FALLBACKS],
 };
 const FALLBACK_TEXTURE_URL = '/models/kia-nq5-22my-wheel-small-17inch.png';
 

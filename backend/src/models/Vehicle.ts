@@ -100,7 +100,7 @@ export interface IGastoDetalle {
 export interface IVehicleDocument extends Document {
   marca: string;
   modelo: string;
-  tipoVehiculo: 'suv' | 'pickup' | 'sedan' | 'hatchback';
+  tipoVehiculo: 'suv' | 'pickup' | 'sedan' | 'hatchback' | 'motocicleta' | 'motocarro';
   año: number;
   placa: string;
   vin: string;
@@ -133,7 +133,15 @@ export interface IVehicleDocument extends Document {
   inversionistas: IInversionista[];
   tieneInversionistas: boolean;
   estado: 'en_proceso' | 'listo_venta' | 'en_negociacion' | 'separado' | 'vendido' | 'retirado';
-  estadoTramite?: 'firma_documentos' | 'radicacion' | 'revision_documentos' | 'aprobado' | 'rechazado';
+  estadoTramite?:
+    | 'firma_documentos'
+    | 'radicacion'
+    | 'recepcion_tarjeta'
+    | 'entrega_cliente'
+    | 'completado'
+    | 'revision_documentos'
+    | 'aprobado'
+    | 'rechazado';
   datosTarjetaPropiedad?: IDatosTarjetaPropiedad;
   datosVenta?: IDatosVenta;
   datosSeparacion?: IDatosSeparacion;
@@ -210,7 +218,7 @@ const vehicleSchema = new Schema<IVehicleDocument>({
   modelo: { type: String, required: true },
   tipoVehiculo: {
     type: String,
-    enum: ['suv', 'pickup', 'sedan', 'hatchback'],
+    enum: ['suv', 'pickup', 'sedan', 'hatchback', 'motocicleta', 'motocarro'],
     default: 'sedan',
   },
   año: { type: Number, required: true },
@@ -251,7 +259,16 @@ const vehicleSchema = new Schema<IVehicleDocument>({
   },
   estadoTramite: {
     type: String,
-    enum: ['firma_documentos', 'radicacion', 'revision_documentos', 'aprobado', 'rechazado'],
+    enum: [
+      'firma_documentos',
+      'radicacion',
+      'recepcion_tarjeta',
+      'entrega_cliente',
+      'completado',
+      'revision_documentos',
+      'aprobado',
+      'rechazado',
+    ],
   },
   datosTarjetaPropiedad: {
     linea: { type: String, default: '' },
