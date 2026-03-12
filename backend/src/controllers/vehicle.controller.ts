@@ -6,6 +6,7 @@ import ExcelJS from 'exceljs';
 import path from 'path';
 import fs from 'fs';
 import PDFDocument from 'pdfkit';
+import { PDFDocument as EditablePdfDocument, PDFForm } from 'pdf-lib';
 import { ensureUploadsDir, getPhotoFileName, getUploadsDir } from '../utils/uploads';
 import { isUsingCloudinary } from '../middleware/upload.middleware';
 
@@ -13,6 +14,16 @@ const VEHICLE_TYPES = new Set(['suv', 'pickup', 'sedan', 'hatchback']);
 const SALE_READY_STATUS = 'listo_venta';
 const NEGOTIATION_STATUS = 'en_negociacion';
 const INVENTORY_STATUSES = ['en_proceso', SALE_READY_STATUS, NEGOTIATION_STATUS];
+const EDITABLE_TRANSFER_FORM_TEMPLATE_PATH = path.resolve(
+  __dirname,
+  '../../templates/Formulario traspaso de vehiculos (Editable.pdf'
+);
+
+type TransferFormNameParts = {
+  primerApellido: string;
+  segundoApellido: string;
+  nombres: string;
+};
 
 const normalizeVehicleType = (value: any): 'suv' | 'pickup' | 'sedan' | 'hatchback' => {
   const parsed = typeof value === 'string' ? value.toLowerCase().trim() : '';
@@ -156,6 +167,51 @@ const getFirstDate = (...values: unknown[]): Date => {
   }
 
   return new Date();
+};
+
+const splitFullNameForTransferForm = (fullName: unknown): TransferFormNameParts => {
+  const tokens = getTrimmedString(fullName).split(/\s+/).filter(Boolean);
+
+  if (tokens.length === 0) {
+    return {
+      primerApellido: '',
+      segundoApellido: '',
+      nombres: '',
+    };
+  }
+
+  if (tokens.length === 1) {
+    return {
+      primerApellido: tokens[0],
+      segundoApellido: '',
+      nombres: '',
+    };
+  }
+
+  if (tokens.length === 2) {
+    return {
+      primerApellido: tokens[0],
+      segundoApellido: tokens[1],
+      nombres: '',
+    };
+  }
+
+  return {
+    primerApellido: tokens[0],
+    segundoApellido: tokens[1],
+    nombres: tokens.slice(2).join(' '),
+  };
+};
+
+const setTransferFormTextField = (form: PDFForm, fieldName: string, value: unknown) => {
+  const text = getTrimmedString(value);
+  if (!text) return;
+
+  try {
+    form.getTextField(fieldName).setText(text);
+  } catch (error) {
+    console.warn(`[TransferForm] No se pudo asignar el campo ${fieldName}:`, error);
+  }
 };
 
 const normalizeTextValue = (value: string) =>
@@ -1396,6 +1452,68 @@ export const generateTransferForm = async (req: AuthRequest, res: Response): Pro
       res.status(400).json({ 
         message: 'El vehículo no tiene datos de venta completos.' 
       });
+      return;
+    }
+
+    if (fs.existsSync(EDITABLE_TRANSFER_FORM_TEMPLATE_PATH)) {
+      const templateBytes = fs.readFileSync(EDITABLE_TRANSFER_FORM_TEMPLATE_PATH);
+      const pdfDoc = await EditablePdfDocument.load(templateBytes);
+      const form = pdfDoc.getForm();
+
+      const vendedorName = splitFullNameForTransferForm(vehicle.datosVenta.vendedor.nombre);
+      const compradorName = splitFullNameForTransferForm(vehicle.datosVenta.comprador.nombre);
+      const ciudad = getFirstString(
+        vehicle.datosVenta.transaccion?.lugarCelebracion,
+        vehicle.datosVenta.transaccion?.domicilioContractual,
+        vehicle.datosVenta.vehiculoAdicional?.sitioMatricula
+      );
+
+      const placa = getFirstString(vehicle.placa).toUpperCase();
+      const placaLetras = placa.replace(/[^A-Z]/g, '').slice(0, 3);
+      const placaNumeros = placa.replace(/[^0-9]/g, '').slice(0, 3);
+
+      const fields: Record<string, string> = {
+        text_1cebd: vendedorName.primerApellido,
+        text_2zdud: vendedorName.segundoApellido,
+        text_3dxnw: vendedorName.nombres,
+        text_4rcmx: getFirstString(vehicle.datosVenta.vendedor.direccion),
+        text_5vuko: ciudad,
+        text_6lsms: getFirstString(vehicle.datosVenta.vendedor.telefono),
+        text_7dztw: getFirstString(vehicle.datosVenta.vendedor.identificacion),
+        text_8nlhe: compradorName.primerApellido,
+        text_9mwir: compradorName.segundoApellido,
+        text_10ndyp: compradorName.nombres,
+        text_11kmlk: getFirstString(vehicle.datosVenta.comprador.identificacion),
+        text_12fkbe: getFirstString(vehicle.datosVenta.comprador.direccion),
+        text_13yto: ciudad,
+        text_14odhp: getFirstString(vehicle.datosVenta.comprador.telefono),
+        text_15dims: getFirstString(vehicle.marca),
+        text_16ishi: getFirstString(vehicleInfo.linea, vehicle.modelo),
+        text_17gt: getFirstString(vehicle.color),
+        text_18yelw: getFirstString(vehicleInfo.capacidad),
+        text_19bqzf: (vehicle as any)['a\u00f1o'] ? String((vehicle as any)['a\u00f1o']) : '',
+        text_20ahqf: getFirstString(vehicleInfo.cilindrada),
+        text_21plkh: getFirstString(
+          vehicleInfo.tipoCarroceria,
+          vehicle.datosVenta.vehiculoAdicional?.tipoCarroceria
+        ),
+        text_22mabc: getFirstString(vehicleInfo.numeroMotor),
+        text_23anzm: getFirstString(vehicleInfo.numeroChasis),
+        text_24wrk: getFirstString(vehicleInfo.vin, vehicleInfo.numeroChasis),
+        text_25qsfc: getFirstString(vehicleInfo.vin),
+        text_27talf: placaLetras,
+        text_28pszl: placaNumeros,
+      };
+
+      Object.entries(fields).forEach(([fieldName, value]) => {
+        setTransferFormTextField(form, fieldName, value);
+      });
+
+      const outputBytes = await pdfDoc.save();
+      const fileName = `formulario-traspaso-${vehicle.placa}-${Date.now()}.pdf`;
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+      res.send(Buffer.from(outputBytes));
       return;
     }
 
